@@ -10,6 +10,8 @@ use prelude::*;
 
 #[macro_use]
 extern crate eyre;
+#[macro_use]
+extern crate tracing;
 
 mod logger;
 mod repo;
@@ -26,6 +28,7 @@ fn main() -> Result<()> {
 
     let list: Vec<String> = serde_json::from_slice(&std::fs::read(&list_json)?)?;
     for user_repo in &list {
+        let _span = error_span!("list", user_repo).entered();
         repo::Repo::new(user_repo)?.output()?;
     }
 

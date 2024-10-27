@@ -1,8 +1,8 @@
+use crate::prelude::*;
 use cargo_metadata::Package;
 use output::Output;
+use std::fs;
 use testcases::PkgTests;
-
-use crate::prelude::*;
 
 mod output;
 mod testcases;
@@ -43,8 +43,7 @@ impl Repo {
     fn packages(&self) -> Vec<&Package> {
         self.workspaces
             .values()
-            .map(|ws| ws.workspace_packages())
-            .flatten()
+            .flat_map(|ws| ws.workspace_packages())
             .collect()
     }
 
@@ -85,20 +84,24 @@ impl Repo {
     fn write_json(&self, json: &serde_json::Value) -> Result<()> {
         let mut path = Utf8PathBuf::from_iter([crate::BASE, &self.user, &self.repo]);
         path.set_extension("json");
-        serde_json::to_writer_pretty(std::fs::File::create(&path)?, json)?;
+        fs::create_dir_all(path.parent().unwrap())?;
+        let _span = error_span!("write_json", ?path).entered();
+
+        serde_json::to_writer_pretty(fs::File::create(&path)?, json)?;
         Ok(())
     }
 }
 
 pub fn git_clone(user: &str, repo: &str) -> Result<Utf8PathBuf> {
-    let dir = Utf8PathBuf::from_path_buf(dirs::home_dir().unwrap())
+    let dir = Utf8PathBuf::from_path_buf(dirs::template_dir().unwrap())
         .unwrap()
+        .join("os-checker-plugin-cargo")
         .join(user)
         .join(repo);
-    std::fs::create_dir_all(&dir)?;
+    fs::create_dir_all(&dir)?;
 
-    let url = format!("https://github.com/{repo}.git");
-    duct::cmd!("git", "clont", url, &dir)
+    let url = format!("https://github.com/{user}/{repo}.git");
+    duct::cmd!("git", "clone", url, &dir)
         .run()
         .with_context(|| format!("fail to clone {repo}"))?;
 
