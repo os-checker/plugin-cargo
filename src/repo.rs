@@ -97,7 +97,7 @@ pub fn git_clone(user: &str, repo: &str) -> Result<Utf8PathBuf> {
     fs::create_dir_all(&dir)?;
 
     let url = format!("https://github.com/{user}/{repo}.git");
-    duct::cmd!("git", "clone", url, &dir)
+    duct::cmd!("git", "clone", "--recursive", url, &dir)
         .run()
         .with_context(|| format!("fail to clone {repo}"))?;
 
