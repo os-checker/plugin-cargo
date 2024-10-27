@@ -1,13 +1,13 @@
 use crate::prelude::*;
-use serde::Serialize;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub struct Repo {
     user: String,
     repo: String,
     // repo root
     dir: Utf8PathBuf,
     cargo_tomls: Vec<Utf8PathBuf>,
+    workspaces: Workspaces,
 }
 
 impl Repo {
@@ -17,13 +17,18 @@ impl Repo {
         let repo = v[1].to_owned();
 
         let dir = git_clone(&user, &repo)?;
-        let cargo_tomls = get_cargo_tomls_recursively(&dir);
+
+        let mut cargo_tomls = get_cargo_tomls_recursively(&dir);
+        cargo_tomls.sort_unstable();
+
+        let workspaces = workspaces(&cargo_tomls)?;
 
         Ok(Repo {
             user,
             repo,
             dir,
             cargo_tomls,
+            workspaces,
         })
     }
 }
@@ -60,7 +65,25 @@ pub fn get_cargo_tomls_recursively(dir: &Utf8Path) -> Vec<Utf8PathBuf> {
         .collect()
 }
 
-pub fn run_cargo_metadata(dir: &Utf8Path) {}
+type Workspaces = IndexMap<Utf8PathBuf, Metadata>;
+
+fn workspaces(cargo_tomls: &[Utf8PathBuf]) -> Result<Workspaces> {
+    let mut map = IndexMap::new();
+    for cargo_toml in cargo_tomls {
+        // NOTE: 一旦支持 features，这里可能需要传递它们
+        let metadata = cargo_metadata::MetadataCommand::new()
+            .manifest_path(cargo_toml)
+            .exec()
+            .map_err(|err| eyre!("无法读取 cargo metadata 的结果：{err}"))?;
+        let root = &metadata.workspace_root;
+        // 每个 member package 解析的 workspace_root 和 members 是一样的
+        if !map.contains_key(root) {
+            map.insert(root.clone(), metadata);
+        }
+    }
+    map.sort_unstable_keys();
+    Ok(map)
+}
 
 #[test]
 fn test_cargo_tomls() {
