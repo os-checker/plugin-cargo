@@ -1,8 +1,10 @@
 use cargo_metadata::Package;
+use output::Output;
 use testcases::PkgTests;
 
 use crate::prelude::*;
 
+mod output;
 mod testcases;
 
 #[derive(Debug)]
@@ -37,8 +39,8 @@ impl Repo {
         })
     }
 
-    // /// packages in all repos
-    fn packages_dirs(&self) -> Vec<&Package> {
+    // packages in all repos
+    fn packages(&self) -> Vec<&Package> {
         self.workspaces
             .values()
             .map(|ws| ws.workspace_packages())
@@ -52,6 +54,28 @@ impl Repo {
             map.extend(testcases::get(&self.dir, workspace_root)?);
         }
         Ok(map)
+    }
+
+    pub fn output(&self) -> Result<Vec<Output>> {
+        // let pkgs: IndexMap<_, _> = self
+        //     .packages_dirs()
+        //     .iter()
+        //     .map(|pkg| (pkg.name.as_str(), *pkg))
+        //     .collect();
+        let mut test_cases = self.get_pkg_tests()?;
+
+        let pkgs = self.packages();
+        let mut outputs = Vec::with_capacity(pkgs.len());
+        for pkg in pkgs {
+            outputs.push(Output::new(
+                pkg,
+                test_cases.swap_remove(&pkg.name),
+                &self.user,
+                &self.repo,
+            ));
+        }
+
+        Ok(outputs)
     }
 }
 
