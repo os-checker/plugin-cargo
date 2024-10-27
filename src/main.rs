@@ -26,7 +26,13 @@ fn main() -> Result<()> {
     let list: Vec<String> = serde_json::from_slice(&std::fs::read(&list_json)?)?;
     for user_repo in &list {
         let _span = error_span!("list", user_repo).entered();
-        repo::Repo::new(user_repo)?.output()?;
+        match repo::Repo::new(user_repo) {
+            Ok(val) => match val.output() {
+                Ok(_) => (),
+                Err(err) => error!(?err),
+            },
+            Err(err) => error!(?err),
+        };
     }
 
     Ok(())
