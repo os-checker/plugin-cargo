@@ -29,6 +29,12 @@ jobs:
           tree --help
           tree --gitignore -h
 
+      - name: Install cargo-nextest
+        run: |
+          wget https://github.com/nextest-rs/nextest/releases/download/cargo-nextest-0.9.81/cargo-nextest-0.9.81-x86_64-unknown-linux-gnu.tar.gz
+          tar xzvf cargo-nextest-0.9.81-x86_64-unknown-linux-gnu.tar.gz
+          mv cargo-nextest ~/.cargo/bin
+
       - name: Install plugin-cargo
         run: cargo install --path .
 
