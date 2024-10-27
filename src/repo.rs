@@ -1,4 +1,9 @@
+use cargo_metadata::Package;
+use testcases::PkgTests;
+
 use crate::prelude::*;
+
+mod testcases;
 
 #[derive(Debug)]
 pub struct Repo {
@@ -30,6 +35,23 @@ impl Repo {
             cargo_tomls,
             workspaces,
         })
+    }
+
+    // /// packages in all repos
+    fn packages_dirs(&self) -> Vec<&Package> {
+        self.workspaces
+            .values()
+            .map(|ws| ws.workspace_packages())
+            .flatten()
+            .collect()
+    }
+
+    fn get_pkg_tests(&self) -> Result<PkgTests> {
+        let mut map = PkgTests::new();
+        for workspace_root in self.workspaces.keys() {
+            map.extend(testcases::get(&self.dir, workspace_root)?);
+        }
+        Ok(map)
     }
 }
 

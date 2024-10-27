@@ -11,6 +11,7 @@ cargo_metadata  = "0.18"
 duct = "0.13"
 dirs = "5"
 walkdir = "2"
+nextest-metadata = "0.12"
 
 camino = "1"
 indexmap = "2"
