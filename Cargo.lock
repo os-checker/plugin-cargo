@@ -297,6 +297,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 
 [[package]]
+name = "os-checker-plugin-cargo"
+version = "0.1.0"
+dependencies = [
+ "camino",
+ "cargo_metadata",
+ "color-eyre",
+ "duct",
+ "eyre",
+ "indexmap",
+ "nextest-metadata",
+ "serde",
+ "serde_json",
+ "tracing",
+ "tracing-error",
+ "tracing-subscriber",
+ "walkdir",
+]
+
+[[package]]
 name = "os_pipe"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -323,25 +342,6 @@ name = "pin-project-lite"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "915a1e146535de9163f3987b8944ed8cf49a18bb0056bcebcdcece385cece4ff"
-
-[[package]]
-name = "plugin-cargo"
-version = "0.1.0"
-dependencies = [
- "camino",
- "cargo_metadata",
- "color-eyre",
- "duct",
- "eyre",
- "indexmap",
- "nextest-metadata",
- "serde",
- "serde_json",
- "tracing",
- "tracing-error",
- "tracing-subscriber",
- "walkdir",
-]
 
 [[package]]
 name = "proc-macro2"
