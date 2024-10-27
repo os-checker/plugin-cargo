@@ -93,11 +93,7 @@ impl Repo {
 }
 
 pub fn git_clone(user: &str, repo: &str) -> Result<Utf8PathBuf> {
-    let dir = Utf8PathBuf::from_path_buf(dirs::template_dir().unwrap())
-        .unwrap()
-        .join("os-checker-plugin-cargo")
-        .join(user)
-        .join(repo);
+    let dir = Utf8PathBuf::from_iter(["/tmp", "os-checker-plugin-cargo", user, repo]);
     fs::create_dir_all(&dir)?;
 
     let url = format!("https://github.com/{user}/{repo}.git");

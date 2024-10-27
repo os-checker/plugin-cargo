@@ -9,7 +9,6 @@ serde_json = { version = "1", features = ["preserve_order"] }
 
 cargo_metadata  = "0.18"
 duct = "0.13"
-dirs = "5"
 walkdir = "2"
 nextest-metadata = "0.12"
 
