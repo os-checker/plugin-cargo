@@ -1,0 +1,23 @@
+[package]
+name = "plugin-cargo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+
+cargo_metadata  = "0.18"
+duct = "0.13"
+
+camino = "1"
+indexmap = "2"
+
+# error handling
+eyre = "0.6"
+color-eyre = "0.6"
+
+# logger
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-error = "0.2"
