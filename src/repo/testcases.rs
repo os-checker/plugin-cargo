@@ -15,10 +15,20 @@ pub type PkgTests = IndexMap<String, TestCases>;
 // nextest reports all member tests even if it's run under a member, so we just run under workspace
 pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> {
     let summary = test_list(workspace_root)?;
+
     let workspace_tests_count = summary.test_count;
+    // nextest will report all bins even if zero testcase, so don't show them
+    if workspace_tests_count == 0 {
+        return Ok(Default::default());
+    }
 
     let mut map = PkgTests::with_capacity(summary.rust_suites.len());
     for ele in summary.rust_suites.values() {
+        if ele.test_cases.is_empty() {
+            // skip zero testcase
+            continue;
+        }
+
         let test = TestBinary::new(ele, repo_root);
         if let Some((_, _, tests)) = map.get_full_mut(&ele.package_name) {
             tests.tests.push(test);
