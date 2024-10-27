@@ -1,28 +1,26 @@
 use super::testcases::TestCases;
 use cargo_metadata::Package;
+use serde::Serialize;
 
+#[derive(Debug, Serialize)]
 pub struct Output {
-    user: String,
-    repo: String,
-    version: String,
-    dependencies: usize,
-    lib: bool,
-    bin: bool,
-    testcases: Option<TestCases>,
-    tests: usize,
-    examples: usize,
-    benches: usize,
-    author: Vec<String>,
-    description: String,
-    categories: Vec<String>,
-    os_categories: Vec<String>,
+    pub version: String,
+    pub dependencies: usize,
+    pub lib: bool,
+    pub bin: bool,
+    pub testcases: Option<TestCases>,
+    pub tests: usize,
+    pub examples: usize,
+    pub benches: usize,
+    pub author: Vec<String>,
+    pub description: String,
+    pub categories: Vec<String>,
+    pub os_categories: Vec<String>,
 }
 
 impl Output {
-    pub fn new(pkg: &Package, testcases: Option<TestCases>, user: &str, repo: &str) -> Self {
+    pub fn new(pkg: &Package, testcases: Option<TestCases>) -> Self {
         Output {
-            user: user.to_owned(),
-            repo: repo.to_owned(),
             version: pkg.version.to_string(),
             testcases,
             dependencies: pkg.dependencies.len(),

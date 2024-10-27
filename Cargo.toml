@@ -14,7 +14,7 @@ walkdir = "2"
 nextest-metadata = "0.12"
 
 camino = "1"
-indexmap = "2"
+indexmap = { version = "2", features = ["serde"] }
 
 # error handling
 eyre = "0.6"

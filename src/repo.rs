@@ -56,26 +56,37 @@ impl Repo {
         Ok(map)
     }
 
-    pub fn output(&self) -> Result<Vec<Output>> {
-        // let pkgs: IndexMap<_, _> = self
-        //     .packages_dirs()
-        //     .iter()
-        //     .map(|pkg| (pkg.name.as_str(), *pkg))
-        //     .collect();
+    pub fn output(&self) -> Result<()> {
         let mut test_cases = self.get_pkg_tests()?;
-
         let pkgs = self.packages();
-        let mut outputs = Vec::with_capacity(pkgs.len());
+
+        let mut outputs = IndexMap::with_capacity(pkgs.len());
         for pkg in pkgs {
-            outputs.push(Output::new(
-                pkg,
-                test_cases.swap_remove(&pkg.name),
-                &self.user,
-                &self.repo,
-            ));
+            let pkg_name = pkg.name.as_str();
+            let output = Output::new(pkg, test_cases.swap_remove(pkg_name));
+            assert!(
+                outputs.insert(pkg_name, output).is_none(),
+                "os-checker can't handle duplicated package names in a repo"
+            );
         }
 
-        Ok(outputs)
+        outputs.sort_unstable_keys();
+
+        let json = serde_json::json!({
+            "user": self.user,
+            "repo": self.repo,
+            "pkg": outputs
+        });
+        self.write_json(&json)?;
+
+        Ok(())
+    }
+
+    fn write_json(&self, json: &serde_json::Value) -> Result<()> {
+        let mut path = Utf8PathBuf::from_iter([crate::BASE, &self.user, &self.repo]);
+        path.set_extension("json");
+        serde_json::to_writer_pretty(std::fs::File::create(&path)?, json)?;
+        Ok(())
     }
 }
 

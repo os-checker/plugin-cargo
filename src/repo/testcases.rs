@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use nextest_metadata::{RustTestSuiteSummary, TestListSummary};
+use serde::Serialize;
 
 fn test_list(dir: &Utf8Path) -> Result<TestListSummary> {
     let mut command = nextest_metadata::ListCommand::new();
@@ -23,7 +24,6 @@ pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> 
             tests.tests.push(test);
         } else {
             let tests = TestCases {
-                pkg_name: ele.package_name.clone(),
                 tests: vec![test],
                 pkg_tests_count: 0,
                 workspace_tests_count,
@@ -39,20 +39,21 @@ pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> 
     Ok(map)
 }
 
+#[derive(Debug, Serialize)]
 pub struct TestCases {
-    pkg_name: String,
-    tests: Vec<TestBinary>,
-    pkg_tests_count: usize,
-    workspace_tests_count: usize,
+    pub tests: Vec<TestBinary>,
+    pub pkg_tests_count: usize,
+    pub workspace_tests_count: usize,
 }
 
+#[derive(Debug, Serialize)]
 pub struct TestBinary {
-    id: String,
-    kind: String,
-    binary_name: String,
+    pub id: String,
+    pub kind: String,
+    pub binary_name: String,
     // strip repo root
-    binary_path: String,
-    testcases: Vec<String>,
+    pub binary_path: String,
+    pub testcases: Vec<String>,
 }
 
 impl TestBinary {
