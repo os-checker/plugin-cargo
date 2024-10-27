@@ -36,6 +36,13 @@ pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> 
         ele.pkg_tests_count = ele.tests.iter().map(|t| t.testcases.len()).sum();
     }
 
+    let sum_pkg_tests_count: usize = map.values().map(|p| p.pkg_tests_count).sum();
+    ensure!(
+        sum_pkg_tests_count == workspace_tests_count,
+        "test cases count are not equal: sum_pkg_tests_count ({sum_pkg_tests_count}) \
+         ≠ workspace_tests_count ({workspace_tests_count})"
+    );
+
     Ok(map)
 }
 
