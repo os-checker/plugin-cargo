@@ -24,16 +24,32 @@ fn main() -> Result<()> {
     let list_json = Utf8PathBuf::from(arg.as_deref().unwrap_or("list.json"));
 
     let list: Vec<String> = serde_json::from_slice(&std::fs::read(&list_json)?)?;
+    let mut outputs = Vec::with_capacity(list.len());
     for user_repo in &list {
         let _span = error_span!("list", user_repo).entered();
         match repo::Repo::new(user_repo) {
             Ok(val) => match val.output() {
-                Ok(_) => (),
+                Ok(output) => outputs.push(output),
                 Err(err) => error!(?err),
             },
             Err(err) => error!(?err),
         };
     }
 
+    write_json(
+        &Utf8PathBuf::from_iter([crate::BASE, "summaries.json"]),
+        &outputs,
+    )?;
+
+    Ok(())
+}
+
+fn write_json<T: serde::Serialize>(path: &Utf8Path, val: &T) -> Result<()> {
+    use std::fs;
+
+    fs::create_dir_all(path.parent().unwrap())?;
+    let _span = error_span!("write_json", ?path).entered();
+
+    serde_json::to_writer_pretty(fs::File::create(path)?, val)?;
     Ok(())
 }

@@ -55,7 +55,7 @@ impl Repo {
         Ok(map)
     }
 
-    pub fn output(&self) -> Result<()> {
+    pub fn output(&self) -> Result<serde_json::Value> {
         let mut test_cases = self.get_pkg_tests()?;
         let pkgs = self.packages();
 
@@ -78,17 +78,13 @@ impl Repo {
         });
         self.write_json(&json)?;
 
-        Ok(())
+        Ok(json)
     }
 
     fn write_json(&self, json: &serde_json::Value) -> Result<()> {
         let mut path = Utf8PathBuf::from_iter([crate::BASE, &self.user, &self.repo]);
         path.set_extension("json");
-        fs::create_dir_all(path.parent().unwrap())?;
-        let _span = error_span!("write_json", ?path).entered();
-
-        serde_json::to_writer_pretty(fs::File::create(&path)?, json)?;
-        Ok(())
+        crate::write_json(&path, json)
     }
 }
 
