@@ -74,7 +74,7 @@ impl Repo {
         let json = serde_json::json!({
             "user": self.user,
             "repo": self.repo,
-            "pkg": outputs
+            "pkgs": outputs
         });
         self.write_json(&json)?;
 
