@@ -8,6 +8,7 @@ mod output;
 mod testcases;
 
 #[derive(Debug)]
+#[allow(unused)]
 pub struct Repo {
     user: String,
     repo: String,
