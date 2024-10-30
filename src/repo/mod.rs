@@ -57,7 +57,10 @@ impl Repo {
     }
 
     pub fn output(&self) -> Result<serde_json::Value> {
-        let mut test_cases = self.get_pkg_tests()?;
+        let mut test_cases = self
+            .get_pkg_tests()
+            .inspect_err(|err| error!(?err, "Failed to get testcases"))
+            .unwrap_or_default();
         let pkgs = self.packages();
 
         let mut outputs = IndexMap::with_capacity(pkgs.len());
