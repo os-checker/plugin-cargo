@@ -69,22 +69,22 @@ pub struct TestBinary {
     pub kind: String,
     pub binary_name: String,
     // strip repo root
-    pub binary_path: String,
+    // pub binary_path: String,
     pub testcases: Vec<String>,
 }
 
 impl TestBinary {
-    pub fn new(ele: &RustTestSuiteSummary, repo_root: &Utf8Path) -> Self {
+    pub fn new(ele: &RustTestSuiteSummary, _repo_root: &Utf8Path) -> Self {
         let binary = &ele.binary;
         TestBinary {
             id: binary.binary_id.to_string(),
             kind: binary.kind.to_string(),
             binary_name: binary.binary_name.clone(),
-            binary_path: binary
-                .binary_path
-                .strip_prefix(repo_root)
-                .unwrap_or(&binary.binary_path)
-                .to_string(),
+            // binary_path: binary
+            //     .binary_path
+            //     .strip_prefix(repo_root)
+            //     .unwrap_or(&binary.binary_path)
+            //     .to_string(),
             testcases: ele.test_cases.keys().map(|k| k.to_owned()).collect(),
         }
     }
