@@ -12,7 +12,7 @@ pub struct Output {
     pub tests: usize,
     pub examples: usize,
     pub benches: usize,
-    pub author: Vec<String>,
+    pub authors: Vec<String>,
     pub description: String,
     pub categories: Vec<String>,
     pub os_categories: Vec<String>,
@@ -29,7 +29,7 @@ impl Output {
             tests: pkg.targets.iter().filter(|t| t.is_test()).count(),
             examples: pkg.targets.iter().filter(|t| t.is_example()).count(),
             benches: pkg.targets.iter().filter(|t| t.is_bench()).count(),
-            author: pkg.authors.clone(),
+            authors: pkg.authors.clone(),
             description: pkg.description.clone().unwrap_or_default(),
             categories: pkg.categories.clone(),
             os_categories: pkg
