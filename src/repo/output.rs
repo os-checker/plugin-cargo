@@ -14,6 +14,7 @@ pub struct Output {
     pub benches: usize,
     pub authors: Vec<String>,
     pub description: String,
+    pub keywords: Vec<String>,
     pub categories: Vec<String>,
     pub os_categories: Vec<String>,
 }
@@ -31,6 +32,7 @@ impl Output {
             benches: pkg.targets.iter().filter(|t| t.is_bench()).count(),
             authors: pkg.authors.clone(),
             description: pkg.description.clone().unwrap_or_default(),
+            keywords: pkg.keywords.clone(),
             categories: pkg.categories.clone(),
             os_categories: pkg
                 .metadata
