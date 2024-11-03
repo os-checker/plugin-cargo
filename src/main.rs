@@ -1,22 +1,8 @@
-mod prelude {
-    pub use camino::{Utf8Path, Utf8PathBuf};
-    pub use cargo_metadata::Metadata;
-    pub use eyre::{Context, Result};
-    pub use indexmap::IndexMap;
-}
-
-use prelude::*;
+use os_checker_plugin_cargo::{prelude::*, *};
 use std::fs;
 
 #[macro_use]
-extern crate eyre;
-#[macro_use]
 extern crate tracing;
-
-mod logger;
-mod repo;
-
-const BASE: &str = "tmp";
 
 fn main() -> Result<()> {
     logger::init();
@@ -40,12 +26,5 @@ fn main() -> Result<()> {
 
     write_json(&Utf8PathBuf::from_iter([BASE, "summaries.json"]), &outputs)?;
 
-    Ok(())
-}
-
-fn write_json<T: serde::Serialize>(path: &Utf8Path, val: &T) -> Result<()> {
-    let _span = error_span!("write_json", ?path).entered();
-    fs::create_dir_all(path.parent().unwrap())?;
-    serde_json::to_writer_pretty(fs::File::create(path)?, val)?;
     Ok(())
 }
