@@ -7,24 +7,34 @@ use testcases::PkgTests;
 mod output;
 mod testcases;
 
+pub enum RepoSource {
+    Github,
+    Local(Utf8PathBuf),
+}
+
 #[derive(Debug)]
-#[allow(unused)]
 pub struct Repo {
-    user: String,
-    repo: String,
+    pub user: String,
+    pub repo: String,
     // repo root
-    dir: Utf8PathBuf,
-    cargo_tomls: Vec<Utf8PathBuf>,
-    workspaces: Workspaces,
+    pub dir: Utf8PathBuf,
+    pub cargo_tomls: Vec<Utf8PathBuf>,
+    pub workspaces: Workspaces,
 }
 
 impl Repo {
-    pub fn new(user_repo: &str) -> Result<Repo> {
+    pub fn new(user_repo: &str, src: RepoSource) -> Result<Repo> {
         let v: Vec<_> = user_repo.split("/").collect();
         let user = v[0].to_owned();
         let repo = v[1].to_owned();
 
-        let dir = git_clone(&user, &repo)?;
+        let dir = match src {
+            RepoSource::Github => git_clone(&user, &repo)?,
+            RepoSource::Local(p) => {
+                ensure!(p.is_dir(), "{p} is not a directory");
+                p.canonicalize_utf8()?
+            }
+        };
 
         let mut cargo_tomls = get_cargo_tomls_recursively(&dir);
         cargo_tomls.sort_unstable();
