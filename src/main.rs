@@ -28,3 +28,6 @@ fn main() -> Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn from_main() {}

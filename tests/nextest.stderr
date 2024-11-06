@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.53s
+------------
+ Nextest run ID d8f6bdff-9e6c-41eb-b96b-384a7faf132f with nextest profile: default
+    Starting 4 tests across 3 binaries
+        PASS [   0.011s] os-checker-plugin-cargo from_lib
+        PASS [   0.012s] os-checker-plugin-cargo::t1 from_t1
+        PASS [   0.013s] os-checker-plugin-cargo::bin/os-checker-plugin-cargo from_main
+        PASS [   0.504s] os-checker-plugin-cargo repo::test_cargo_tomls
+------------
+     Summary [   0.508s] 4 tests run: 4 passed, 0 skipped

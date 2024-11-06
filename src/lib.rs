@@ -24,3 +24,6 @@ pub fn write_json<T: serde::Serialize>(path: &Utf8Path, val: &T) -> Result<()> {
     serde_json::to_writer_pretty(fs::File::create(path)?, val)?;
     Ok(())
 }
+
+#[test]
+fn from_lib() {}

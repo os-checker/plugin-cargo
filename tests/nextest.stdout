@@ -1,0 +1,14 @@
+{"type":"suite","event":"started","test_count":1,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"t1","kind":"test"}}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::t1$from_t1"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::t1$from_t1","exec_time":0.012385435}
+{"type":"suite","event":"ok","passed":1,"failed":0,"ignored":0,"measured":0,"filtered_out":0,"exec_time":0.012385435,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"t1","kind":"test"}}
+{"type":"suite","event":"started","test_count":1,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os-checker-plugin-cargo","kind":"bin"}}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os-checker-plugin-cargo$from_main"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os-checker-plugin-cargo$from_main","exec_time":0.012558923}
+{"type":"suite","event":"ok","passed":1,"failed":0,"ignored":0,"measured":0,"filtered_out":0,"exec_time":0.012558923,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os-checker-plugin-cargo","kind":"bin"}}
+{"type":"suite","event":"started","test_count":2,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os_checker_plugin_cargo","kind":"lib"}}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$from_lib"}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_cargo_tomls"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$from_lib","exec_time":0.011477933}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_cargo_tomls","exec_time":0.503863582}
+{"type":"suite","event":"ok","passed":2,"failed":0,"ignored":0,"measured":0,"filtered_out":0,"exec_time":0.515341515,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os_checker_plugin_cargo","kind":"lib"}}
