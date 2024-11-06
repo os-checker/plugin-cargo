@@ -11,6 +11,7 @@ extern crate eyre;
 extern crate tracing;
 
 pub mod logger;
+pub mod nextest;
 pub mod repo;
 
 pub const BASE: &str = "tmp";
