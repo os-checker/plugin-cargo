@@ -1,4 +1,5 @@
 //! Ref: https://github.com/nextest-rs/nextest/blob/cb67e450e0fa2803f0089ffc9189c34ecd355f13/nextest-runner/src/reporter/structured/libtest.rs#L116
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -36,7 +37,7 @@ pub enum Event {
     Ignored,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[serde(from = "&str")]
 pub struct Name {
     pkg_name: String,
@@ -101,9 +102,7 @@ fn parse_test_reports(text: &str) -> Vec<ReportTest> {
         .collect()
 }
 
-// NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1 cargo nextest run --message-format libtest-json-plus
-#[test]
-fn run_and_parse() -> crate::Result<()> {
+pub fn run_testcases() -> Result<(String, IndexMap<Name, (Event, Option<f32>)>)> {
     let output = duct::cmd!(
         "cargo",
         "nextest",
@@ -117,11 +116,25 @@ fn run_and_parse() -> crate::Result<()> {
     .unchecked()
     .run()?;
 
-    println!("stderr={}", std::str::from_utf8(&output.stderr)?);
-    println!(
-        "stdout={:?}",
-        parse_test_reports(std::str::from_utf8(&output.stdout)?)
-    );
+    let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+
+    let reports = parse_test_reports(std::str::from_utf8(&output.stdout)?);
+    // new event overrides old ones:
+    // e.g. if a test result is ok, we won't get its started report
+    let testcases = reports
+        .into_iter()
+        .map(|report| (report.name, (report.event, report.exec_time)))
+        .collect();
+
+    Ok((stderr, testcases))
+}
+
+// NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1 cargo nextest run --message-format libtest-json-plus
+#[test]
+fn run_and_parse() -> Result<()> {
+    let (stderr, testcases) = run_testcases()?;
+
+    println!("stderr={stderr}\ntestcases={testcases:?}");
 
     Ok(())
 }
