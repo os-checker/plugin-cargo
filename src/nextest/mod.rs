@@ -90,10 +90,38 @@ fn parse_test_event() {
 #[test]
 fn parse_stream() {
     let text = std::fs::read_to_string("tests/nextest.stdout").unwrap();
-    let reports: Vec<_> = text
-        .lines()
-        .filter_map(|line| serde_json::from_str::<ReportTest>(line).ok())
-        .collect();
+    let reports = parse_test_reports(&text);
     dbg!(&reports);
-    assert!(reports.len() > 0);
+    assert!(!reports.is_empty());
+}
+
+fn parse_test_reports(text: &str) -> Vec<ReportTest> {
+    text.lines()
+        .filter_map(|line| serde_json::from_str::<ReportTest>(line).ok())
+        .collect()
+}
+
+// NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1 cargo nextest run --message-format libtest-json-plus
+#[test]
+fn run_and_parse() -> crate::Result<()> {
+    let output = duct::cmd!(
+        "cargo",
+        "nextest",
+        "run",
+        "--message-format",
+        "libtest-json-plus"
+    )
+    .env("NEXTEST_EXPERIMENTAL_LIBTEST_JSON", "1")
+    .stdout_capture()
+    .stderr_capture()
+    .unchecked()
+    .run()?;
+
+    println!("stderr={}", std::str::from_utf8(&output.stderr)?);
+    println!(
+        "stdout={:?}",
+        parse_test_reports(std::str::from_utf8(&output.stdout)?)
+    );
+
+    Ok(())
 }
