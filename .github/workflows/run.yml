@@ -47,10 +47,8 @@ jobs:
         env:
           PLUGIN_PATH: plugin/cargo
         run: |
-          git config --global user.name "zjp-CN"
-          git config --global user.email "jiping_zhou@foxmail.com"
-          git config --global committer.name "zjp-CN[bot]"
-          git config --global committer.email "zjp-CN[bot]@users.noreply.github.com"
+          git config --global user.name "zjp-CN[bot]"
+          git config --global user.email "zjp-CN[bot]@users.noreply.github.com"
 
           echo "正在 clone os-checker/database"
           git clone https://x-access-token:${{ env.ACCESS_TOKEN }}@github.com/os-checker/database.git
