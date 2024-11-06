@@ -118,11 +118,13 @@ fn parse_test_reports(text: &str) -> Vec<ReportTest> {
         .collect()
 }
 
-pub fn run_testcases() -> Result<(String, IndexMap<Name, (Event, Option<f32>)>)> {
+pub fn run_testcases(dir: &Utf8Path) -> Result<Report> {
     let output = duct::cmd!(
         "cargo",
         "nextest",
         "run",
+        "--no-fail-fast",
+        "--color=never",
         "--message-format",
         "libtest-json-plus"
     )
@@ -130,6 +132,7 @@ pub fn run_testcases() -> Result<(String, IndexMap<Name, (Event, Option<f32>)>)>
     .stdout_capture()
     .stderr_capture()
     .unchecked()
+    .dir(dir)
     .run()?;
 
     let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
@@ -142,14 +145,19 @@ pub fn run_testcases() -> Result<(String, IndexMap<Name, (Event, Option<f32>)>)>
         .map(|report| (report.name, (report.event, report.exec_time)))
         .collect();
 
-    Ok((stderr, testcases))
+    Ok(Report { stderr, testcases })
+}
+
+pub struct Report {
+    pub stderr: String,
+    pub testcases: IndexMap<Name, (Event, Option<f32>)>,
 }
 
 // NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1 cargo nextest run --message-format libtest-json-plus
 #[test]
 fn run_and_parse() -> Result<()> {
     // Why doesn't this cause infinite test running?
-    let (stderr, testcases) = run_testcases()?;
+    let Report { stderr, testcases } = run_testcases(Utf8Path::new("."))?;
 
     println!("stderr={stderr}\ntestcases={testcases:?}");
 
