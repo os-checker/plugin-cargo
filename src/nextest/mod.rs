@@ -1,5 +1,8 @@
 //! Ref: https://github.com/nextest-rs/nextest/blob/cb67e450e0fa2803f0089ffc9189c34ecd355f13/nextest-runner/src/reporter/structured/libtest.rs#L116
+use std::hash::Hash;
+
 use crate::prelude::*;
+use indexmap::Equivalent;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,12 +40,25 @@ pub enum Event {
     Ignored,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(from = "&str")]
 pub struct Name {
     pkg_name: String,
     test_binary: String,
     test_case: String,
+}
+
+impl Hash for Name {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        [&*self.pkg_name, &*self.test_binary, &*self.test_case].hash(state);
+    }
+}
+
+impl Equivalent<Name> for [&'_ str; 3] {
+    fn equivalent(&self, name: &Name) -> bool {
+        let [pkg_name, test_binary, test_case] = *self;
+        name.test_case == test_case && name.test_binary == test_binary && name.pkg_name == pkg_name
+    }
 }
 
 // pkg-name::test_binary_name$testcase_path#n
@@ -132,9 +148,17 @@ pub fn run_testcases() -> Result<(String, IndexMap<Name, (Event, Option<f32>)>)>
 // NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1 cargo nextest run --message-format libtest-json-plus
 #[test]
 fn run_and_parse() -> Result<()> {
+    // Why doesn't this cause infinite test running?
     let (stderr, testcases) = run_testcases()?;
 
     println!("stderr={stderr}\ntestcases={testcases:?}");
+
+    let got = testcases.get(&[
+        "os-checker-plugin-cargo",
+        "os_checker_plugin_cargo",
+        "nextest::parse_stream",
+    ]);
+    assert!(got.is_some());
 
     Ok(())
 }
