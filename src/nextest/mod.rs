@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ReportTest {
     #[serde(rename = "type")]
-    typ: KindTest,
+    typ: TypeTest,
     event: Event,
     name: Name,
     /// execution time in seconds; Some for Event::ok
@@ -12,8 +12,26 @@ pub struct ReportTest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename = "lowercase")]
-pub struct KindTest;
+#[serde(try_from = "String")]
+pub struct TypeTest;
+
+impl TryFrom<&'_ str> for TypeTest {
+    type Error = &'static str;
+
+    fn try_from(text: &'_ str) -> Result<Self, Self::Error> {
+        if text == "test" {
+            Ok(Self)
+        } else {
+            Err("only support test type")
+        }
+    }
+}
+impl TryFrom<String> for TypeTest {
+    type Error = &'static str;
+    fn try_from(text: String) -> Result<Self, Self::Error> {
+        Self::try_from(text.as_str())
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -72,4 +90,21 @@ fn string_to_name() {
     let text_retry = "os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_cargo_tomls#2";
     let name = Name::from(text_retry);
     dbg!(&name);
+}
+
+#[test]
+fn parse_test_event() {
+    let text = r#"{"type":"test","event":"started","name":"os-checker-plugin-cargo::t1$from_t1"}"#;
+    let report: ReportTest = serde_json::from_str(text).unwrap();
+    dbg!(report);
+}
+
+#[test]
+fn parse_stream() {
+    let text = std::fs::read_to_string("tests/nextest.stdout").unwrap();
+    for line in text.lines() {
+        if let Ok(report) = serde_json::from_str::<ReportTest>(line) {
+            dbg!(report);
+        }
+    }
 }
