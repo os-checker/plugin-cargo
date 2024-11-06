@@ -35,20 +35,19 @@ pub struct Name {
 // pkg-name::test_binary_name$testcase_path#n
 // #n is an optional suffix if the test was retried for n times (ignored for now)
 impl From<&'_ str> for Name {
-    fn from(text: &'_ str) -> Self {
-        let mut idx = 0;
-        let pkg_name_end = text[idx..].find(':').unwrap();
-        let pkg_name = text[idx..pkg_name_end].to_owned();
+    fn from(mut text: &'_ str) -> Self {
+        let pkg_name_end = text.find(':').unwrap();
+        let pkg_name = text[..pkg_name_end].to_owned();
 
-        idx = pkg_name_end + 2;
+        text = &text[pkg_name_end + 2..];
 
-        let test_binary_end = idx + text[idx..].find('$').unwrap();
-        let test_binary = text[idx..test_binary_end].to_owned();
+        let test_binary_end = text.find('$').unwrap();
+        let test_binary = text[..test_binary_end].to_owned();
 
-        idx = test_binary_end + 1;
+        text = &text[test_binary_end + 1..];
 
-        let test_case_end = text[idx..].find('#').map(|p| p + idx).unwrap_or(text.len());
-        let test_case = text[idx..test_case_end].to_owned();
+        let test_case_end = text.find('#').unwrap_or(text.len());
+        let test_case = text[..test_case_end].to_owned();
 
         Name {
             pkg_name,
@@ -68,5 +67,9 @@ impl From<String> for Name {
 fn string_to_name() {
     let text = "os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_cargo_tomls";
     let name = Name::from(text);
+    dbg!(&name);
+
+    let text_retry = "os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_cargo_tomls#2";
+    let name = Name::from(text_retry);
     dbg!(&name);
 }
