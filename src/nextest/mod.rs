@@ -12,7 +12,7 @@ pub struct ReportTest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(try_from = "String")]
+#[serde(try_from = "&str")]
 pub struct TypeTest;
 
 impl TryFrom<&'_ str> for TypeTest {
@@ -26,12 +26,6 @@ impl TryFrom<&'_ str> for TypeTest {
         }
     }
 }
-impl TryFrom<String> for TypeTest {
-    type Error = &'static str;
-    fn try_from(text: String) -> Result<Self, Self::Error> {
-        Self::try_from(text.as_str())
-    }
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -43,7 +37,7 @@ pub enum Event {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(from = "String")]
+#[serde(from = "&str")]
 pub struct Name {
     pkg_name: String,
     test_binary: String,
@@ -75,12 +69,6 @@ impl From<&'_ str> for Name {
     }
 }
 
-impl From<String> for Name {
-    fn from(text: String) -> Self {
-        Name::from(text.as_str())
-    }
-}
-
 #[test]
 fn string_to_name() {
     let text = "os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_cargo_tomls";
@@ -102,9 +90,10 @@ fn parse_test_event() {
 #[test]
 fn parse_stream() {
     let text = std::fs::read_to_string("tests/nextest.stdout").unwrap();
-    for line in text.lines() {
-        if let Ok(report) = serde_json::from_str::<ReportTest>(line) {
-            dbg!(report);
-        }
-    }
+    let reports: Vec<_> = text
+        .lines()
+        .filter_map(|line| serde_json::from_str::<ReportTest>(line).ok())
+        .collect();
+    dbg!(&reports);
+    assert!(reports.len() > 0);
 }
