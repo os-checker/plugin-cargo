@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use cargo_metadata::Package;
 use output::Output;
-use std::fs;
+use std::{fs, sync::LazyLock};
 use testcases::PkgTests;
 
 mod output;
@@ -107,8 +107,21 @@ impl Repo {
     }
 }
 
+pub fn git_clone_dir() -> &'static Utf8Path {
+    static GIT_CLONE_DIR: LazyLock<Utf8PathBuf> =
+        LazyLock::new(|| Utf8PathBuf::from_iter(["/tmp", "os-checker-plugin-cargo"]));
+
+    &*GIT_CLONE_DIR
+}
+
+pub fn git_clone_repo_dir(user: &str, repo: &str) -> Utf8PathBuf {
+    let mut dir = git_clone_dir().to_owned();
+    dir.extend([user, repo]);
+    dir
+}
+
 pub fn git_clone(user: &str, repo: &str) -> Result<Utf8PathBuf> {
-    let dir = Utf8PathBuf::from_iter(["/tmp", "os-checker-plugin-cargo", user, repo]);
+    let dir = git_clone_repo_dir(user, repo);
     fs::create_dir_all(&dir)?;
 
     let url = format!("https://github.com/{user}/{repo}.git");
