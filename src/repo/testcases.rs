@@ -43,6 +43,8 @@ pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> 
         } else {
             let tests = TestCases {
                 tests: vec![test],
+                failed: 0,
+                duration_ms: 0,
                 pkg_tests_count: 0,
                 workspace_tests_count,
             };
@@ -51,7 +53,11 @@ pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> 
     }
 
     for ele in map.values_mut() {
-        ele.pkg_tests_count = ele.tests.iter().map(|t| t.testcases.len()).sum();
+        for t in &ele.tests {
+            ele.failed += t.failed;
+            ele.duration_ms += t.duration_ms;
+            ele.pkg_tests_count += t.testcases.len();
+        }
     }
 
     let sum_pkg_tests_count: usize = map.values().map(|p| p.pkg_tests_count).sum();
@@ -67,6 +73,8 @@ pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> 
 #[derive(Debug, Serialize)]
 pub struct TestCases {
     pub tests: Vec<TestBinary>,
+    pub failed: usize,
+    pub duration_ms: usize,
     pub pkg_tests_count: usize,
     pub workspace_tests_count: usize,
 }
@@ -79,6 +87,10 @@ pub struct TestBinary {
     // strip repo root
     // pub binary_path: String,
     pub testcases: Vec<TestCase>,
+    /// how many testcases are failed
+    pub failed: usize,
+    /// total duration in ms; maybe zero for various reasons
+    pub duration_ms: usize,
 }
 
 #[derive(Debug, Serialize)]
@@ -105,6 +117,19 @@ impl TestBinary {
         let binary = &ele.binary;
         let pkg_name = &*ele.package_name;
         let bin_name = &*binary.binary_name;
+        let testcases: Vec<_> = ele
+            .test_cases
+            .keys()
+            .map(|name| TestCase::new(name, pkg_name, bin_name, report))
+            .collect();
+        let (failed, duration_ms) = testcases.iter().fold((0, 0), |(s, d), t| {
+            let d = d + t.duration_ms.unwrap_or(0) as usize;
+            if t.status == Some(Event::Failed) {
+                (s + 1, d)
+            } else {
+                (s, d)
+            }
+        });
         TestBinary {
             id: binary.binary_id.to_string(),
             kind: binary.kind.to_string(),
@@ -114,11 +139,9 @@ impl TestBinary {
             //     .strip_prefix(repo_root)
             //     .unwrap_or(&binary.binary_path)
             //     .to_string(),
-            testcases: ele
-                .test_cases
-                .keys()
-                .map(|name| TestCase::new(name, pkg_name, bin_name, report))
-                .collect(),
+            testcases,
+            failed,
+            duration_ms,
         }
     }
 }
