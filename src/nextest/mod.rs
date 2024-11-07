@@ -1,9 +1,8 @@
 //! Ref: https://github.com/nextest-rs/nextest/blob/cb67e450e0fa2803f0089ffc9189c34ecd355f13/nextest-runner/src/reporter/structured/libtest.rs#L116
-use std::hash::Hash;
-
 use crate::prelude::*;
 use indexmap::Equivalent;
 use serde::{Deserialize, Serialize};
+use std::hash::Hash;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ReportTest {
@@ -31,7 +30,7 @@ impl TryFrom<&'_ str> for TypeTest {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum Event {
     Started,
@@ -118,11 +117,12 @@ fn parse_test_reports(text: &str) -> Vec<ReportTest> {
         .collect()
 }
 
-pub fn run_testcases(dir: &Utf8Path) -> Result<Report> {
+pub fn run_testcases(ws_dir: &Utf8Path) -> Result<Report> {
     let output = duct::cmd!(
         "cargo",
         "nextest",
         "run",
+        "--workspace",
         "--no-fail-fast",
         "--color=never",
         "--message-format",
@@ -132,7 +132,7 @@ pub fn run_testcases(dir: &Utf8Path) -> Result<Report> {
     .stdout_capture()
     .stderr_capture()
     .unchecked()
-    .dir(dir)
+    .dir(ws_dir)
     .run()?;
 
     let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
@@ -150,7 +150,19 @@ pub fn run_testcases(dir: &Utf8Path) -> Result<Report> {
 
 pub struct Report {
     pub stderr: String,
+    /// FIXME: 尚未考虑 binary kind，也就是说，如果同名测试函数路径存在于 lib 和 bin，它们的数据不正确。
+    /// 如果要知道 binary kind，需要解析 suite type 消息，并依赖于解析整个消息。
+    /// 目前只读取 test type 消息，解析单个消息。
     pub testcases: IndexMap<Name, (Event, Option<f32>)>,
+}
+
+impl Report {
+    pub fn get_test_case(&self, pkg_bin_test: &[&str; 3]) -> (Option<Event>, Option<u32>) {
+        match self.testcases.get(pkg_bin_test).copied() {
+            Some((e, t)) => (Some(e), t.map(|f| (f * 1000.0).round() as u32)), // second => millisecond
+            None => (None, None),
+        }
+    }
 }
 
 // NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1 cargo nextest run --message-format libtest-json-plus
