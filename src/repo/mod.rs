@@ -100,6 +100,11 @@ impl Repo {
         path.set_extension("json");
         crate::write_json(&path, json)
     }
+
+    pub fn remove_local_dir(self) -> Result<()> {
+        std::fs::remove_dir_all(&self.dir)?;
+        Ok(())
+    }
 }
 
 pub fn git_clone(user: &str, repo: &str) -> Result<Utf8PathBuf> {
