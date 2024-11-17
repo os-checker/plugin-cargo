@@ -52,7 +52,7 @@ jobs:
       - name: Test os-checker
         env:
           CONFIGS: "repos-default.json repos-ui.json"
-        run: cargo test -- test_sel4 --nocapture && ls -alh /tmp/os-checker-plugin-cargo
+        run: cargo test -- test_sel4 --nocapture && tree -L 2 /tmp/os-checker-plugin-cargo
 
       # - name: Install plugin-cargo
       #   run: cargo install --path .
