@@ -1,16 +1,13 @@
 use crate::prelude::*;
 use cargo_metadata::Package;
+use eyre::ContextCompat;
 use output::Output;
-use std::{fs, sync::LazyLock};
+use std::sync::LazyLock;
 use testcases::PkgTests;
 
+mod os_checker;
 mod output;
 mod testcases;
-
-pub enum RepoSource {
-    Github,
-    Local(Utf8PathBuf),
-}
 
 #[derive(Debug)]
 pub struct Repo {
@@ -18,24 +15,27 @@ pub struct Repo {
     pub repo: String,
     // repo root
     pub dir: Utf8PathBuf,
+    pub pkg_targets: os_checker::PkgTargets,
     pub cargo_tomls: Vec<Utf8PathBuf>,
     pub workspaces: Workspaces,
 }
 
 impl Repo {
-    pub fn new(user_repo: &str, src: RepoSource) -> Result<Repo> {
-        let v: Vec<_> = user_repo.split("/").collect();
-        let user = v[0].to_owned();
-        let repo = v[1].to_owned();
+    pub fn new(user_repo: &str) -> Result<Repo> {
+        let mut split = user_repo.split("/");
+        let user = split
+            .next()
+            .with_context(|| format!("Not found user in `{user_repo}`."))?
+            .to_owned();
+        let repo = split
+            .next()
+            .with_context(|| format!("Not found repo in `{user_repo}`."))?
+            .to_owned();
 
-        let dir = match src {
-            RepoSource::Github => git_clone(&user, &repo)?,
-            RepoSource::Local(p) => {
-                ensure!(p.is_dir(), "{p} is not a directory");
-                p.canonicalize_utf8()?
-            }
-        };
+        // this implies repo downloading
+        let pkg_targets = os_checker::run(user_repo)?;
 
+        let dir = local_repo_dir(&user, &repo);
         let mut cargo_tomls = get_cargo_tomls_recursively(&dir);
         cargo_tomls.sort_unstable();
 
@@ -45,22 +45,27 @@ impl Repo {
             user,
             repo,
             dir,
+            pkg_targets,
             cargo_tomls,
             workspaces,
         })
     }
 
-    // packages in all repos
+    // packages in all workspaces
     fn packages(&self) -> Vec<&Package> {
         self.workspaces
             .values()
             .flat_map(|ws| ws.workspace_packages())
+            // but don't emit packages that are not checked by os-checker
+            .filter(|pkg| self.pkg_targets.contains_key(pkg.name.as_str()))
             .collect()
     }
 
     fn get_pkg_tests(&self) -> Result<PkgTests> {
         let mut map = PkgTests::new();
         for workspace_root in self.workspaces.keys() {
+            // NOTE: nextest is run under all packages in a workspace,
+            // maybe we should run tests for each package?
             map.extend(testcases::get(&self.dir, workspace_root)?);
         }
         Ok(map)
@@ -107,29 +112,18 @@ impl Repo {
     }
 }
 
-pub fn git_clone_dir() -> &'static Utf8Path {
+pub fn local_base_dir() -> &'static Utf8Path {
     static GIT_CLONE_DIR: LazyLock<Utf8PathBuf> =
         LazyLock::new(|| Utf8PathBuf::from_iter(["/tmp", "os-checker-plugin-cargo"]));
 
-    &*GIT_CLONE_DIR
+    &GIT_CLONE_DIR
 }
 
-pub fn git_clone_repo_dir(user: &str, repo: &str) -> Utf8PathBuf {
-    let mut dir = git_clone_dir().to_owned();
+// dependes on where does os-checker put the repo
+pub fn local_repo_dir(user: &str, repo: &str) -> Utf8PathBuf {
+    let mut dir = local_base_dir().to_owned();
     dir.extend([user, repo]);
     dir
-}
-
-pub fn git_clone(user: &str, repo: &str) -> Result<Utf8PathBuf> {
-    let dir = git_clone_repo_dir(user, repo);
-    fs::create_dir_all(&dir)?;
-
-    let url = format!("https://github.com/{user}/{repo}.git");
-    duct::cmd!("git", "clone", "--recursive", url, &dir)
-        .run()
-        .with_context(|| format!("fail to clone {repo}"))?;
-
-    Ok(dir)
 }
 
 pub fn get_cargo_tomls_recursively(dir: &Utf8Path) -> Vec<Utf8PathBuf> {
@@ -172,4 +166,12 @@ fn workspaces(cargo_tomls: &[Utf8PathBuf]) -> Result<Workspaces> {
 #[test]
 fn test_cargo_tomls() {
     dbg!(get_cargo_tomls_recursively(Utf8Path::new(".")));
+}
+
+#[test]
+fn test_pkg_targets() -> Result<()> {
+    let repo = Repo::new("seL4/rust-sel4")?;
+    dbg!(&repo.pkg_targets);
+    repo.remove_local_dir()?;
+    Ok(())
 }
