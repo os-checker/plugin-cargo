@@ -56,7 +56,10 @@ impl Repo {
             .values()
             .flat_map(|ws| ws.workspace_packages())
             // but don't emit packages that are not checked by os-checker
-            .filter(|pkg| self.pkg_targets.contains_key(pkg.name.as_str()))
+            .filter(|pkg| {
+                info!(pkg.name);
+                self.pkg_targets.contains_key(pkg.name.as_str())
+            })
             .collect()
     }
 
