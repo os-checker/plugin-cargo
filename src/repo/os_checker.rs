@@ -14,6 +14,7 @@ pub fn run(repo: &str) -> Result<Vec<ListTargets>> {
     )
     .stdout_capture()
     .stderr_capture()
+    .unchecked()
     .run()?;
 
     ensure!(
