@@ -3,19 +3,24 @@ use duct::cmd;
 use os_checker_types::layout::ListTargets;
 
 pub fn run(repo: &str) -> Result<Vec<ListTargets>> {
+    // multiple config paths are separated by ` `
+    let configs =
+        std::env::var("CONFIGS").with_context(|| "Must specify `CONFIGS` environment variable.")?;
+
     let dir = super::git_clone_dir();
-    let output = cmd!(
-        "os-checker",
-        "layout",
-        "--base-dir",
-        dir,
-        "--list-targets",
-        repo
-    )
-    .stdout_capture()
-    .stderr_capture()
-    .unchecked()
-    .run()?;
+    let mut args = vec!["layout", "--base-dir", dir.as_str(), "--list-targets", repo];
+
+    for config in configs.split(" ").map(|s| s.trim()) {
+        if !config.is_empty() {
+            args.extend(["--config", config]);
+        }
+    }
+
+    let output = cmd("os-checker", args)
+        .stdout_capture()
+        .stderr_capture()
+        .unchecked()
+        .run()?;
 
     ensure!(
         output.status.success(),
