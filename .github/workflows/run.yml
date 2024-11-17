@@ -49,7 +49,7 @@ jobs:
       - name: Test os-checker
         env:
           CONFIGS: "repos-default.json repos-ui.json"
-        run: cargo test -- test_sel4
+        run: cargo test -- test_sel4 --nocapture
 
       # - name: Install plugin-cargo
       #   run: cargo install --path .
