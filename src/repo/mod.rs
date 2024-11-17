@@ -105,7 +105,7 @@ impl Repo {
     }
 }
 
-pub fn git_clone_dir() -> &'static Utf8Path {
+pub fn local_base_dir() -> &'static Utf8Path {
     static GIT_CLONE_DIR: LazyLock<Utf8PathBuf> =
         LazyLock::new(|| Utf8PathBuf::from_iter(["/tmp", "os-checker-plugin-cargo"]));
 
@@ -114,7 +114,7 @@ pub fn git_clone_dir() -> &'static Utf8Path {
 
 // dependes on where does os-checker put the repo
 pub fn local_repo_dir(user: &str, repo: &str) -> Utf8PathBuf {
-    let mut dir = git_clone_dir().to_owned();
+    let mut dir = local_base_dir().to_owned();
     dir.extend([user, repo]);
     dir
 }
@@ -163,6 +163,8 @@ fn test_cargo_tomls() {
 
 #[test]
 fn test_pkg_targets() -> Result<()> {
-    dbg!(Repo::new("seL4/rust-sel4")?.pkg_targets);
+    let repo = Repo::new("seL4/rust-sel4")?;
+    dbg!(&repo.pkg_targets);
+    repo.remove_local_dir()?;
     Ok(())
 }

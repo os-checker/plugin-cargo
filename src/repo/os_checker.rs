@@ -1,3 +1,4 @@
+use super::local_base_dir;
 use crate::prelude::*;
 use duct::cmd;
 use os_checker_types::layout::ListTargets;
@@ -9,7 +10,7 @@ pub fn run(user_repo: &str) -> Result<PkgTargets> {
     let configs =
         std::env::var("CONFIGS").with_context(|| "Must specify `CONFIGS` environment variable.")?;
 
-    let dir = super::git_clone_dir();
+    let dir = local_base_dir();
     let mut args = vec![
         "layout",
         "--base-dir",
@@ -49,6 +50,6 @@ fn list_to_map(v: Vec<ListTargets>) -> PkgTargets {
 fn test_sel4() -> Result<()> {
     let repo = "seL4/rust-sel4";
     dbg!(run(repo)?);
-    // TODO: remove dir
+    std::fs::remove_dir_all(local_base_dir())?;
     Ok(())
 }
