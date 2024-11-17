@@ -18,6 +18,7 @@ env:
   TAG_REPOS_DEFAULT: cache-v8.redb
   # cache.redb tag in database release
   TAG_CACHE: cache-v11.redb
+  CONFIGS: "repos-default.json repos-ui.json"
 
 jobs:
   run:
@@ -48,10 +49,11 @@ jobs:
           chmod +x ~/.cargo/bin/os-checker
           os-checker layout --help
 
-      - name: Test os-checker
-        env:
-          CONFIGS: "repos-default.json repos-ui.json"
+      - name: Test os-checker layout --list-targets
         run: cargo test -- test_sel4 --nocapture && tree -L 2 /tmp/os-checker-plugin-cargo
+
+      - name: Test pkg_targets
+        run: cargo test -- test_pkg_targets --nocapture
 
       # - name: Install plugin-cargo
       #   run: cargo install --path .

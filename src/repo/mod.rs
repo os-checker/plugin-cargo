@@ -160,3 +160,9 @@ fn workspaces(cargo_tomls: &[Utf8PathBuf]) -> Result<Workspaces> {
 fn test_cargo_tomls() {
     dbg!(get_cargo_tomls_recursively(Utf8Path::new(".")));
 }
+
+#[test]
+fn test_pkg_targets() -> Result<()> {
+    dbg!(Repo::new("seL4/rust-sel4")?.pkg_targets);
+    Ok(())
+}
