@@ -400,6 +400,7 @@ dependencies = [
  "camino",
  "cargo_metadata",
  "color-eyre",
+ "compact_str",
  "duct",
  "eyre",
  "indexmap",

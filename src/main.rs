@@ -15,7 +15,7 @@ fn main() -> Result<()> {
 
     for user_repo in &list {
         let _span = error_span!("list", user_repo).entered();
-        match repo::Repo::new(user_repo, repo::RepoSource::Github) {
+        match repo::Repo::new(user_repo) {
             Ok(repo) => {
                 match repo.output() {
                     Ok(output) => outputs.push(output),
