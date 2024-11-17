@@ -32,6 +32,9 @@ impl Repo {
             .with_context(|| format!("Not found repo in `{user_repo}`."))?
             .to_owned();
 
+        // this implies repo downloading
+        let pkg_targets = os_checker::run(user_repo)?;
+
         let dir = local_repo_dir(&user, &repo);
         let mut cargo_tomls = get_cargo_tomls_recursively(&dir);
         cargo_tomls.sort_unstable();
@@ -39,7 +42,6 @@ impl Repo {
 
         let workspaces = workspaces(&cargo_tomls)?;
 
-        let pkg_targets = os_checker::run(user_repo)?;
         info!(?pkg_targets);
         Ok(Repo {
             user,
