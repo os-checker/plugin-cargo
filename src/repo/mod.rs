@@ -1,12 +1,13 @@
 use crate::prelude::*;
 use cargo_metadata::Package;
+use eyre::ContextCompat;
 use output::Output;
 use std::{fs, sync::LazyLock};
 use testcases::PkgTests;
 
+mod os_checker;
 mod output;
 mod testcases;
-mod os_checker;
 
 pub enum RepoSource {
     Github,
@@ -25,9 +26,15 @@ pub struct Repo {
 
 impl Repo {
     pub fn new(user_repo: &str, src: RepoSource) -> Result<Repo> {
-        let v: Vec<_> = user_repo.split("/").collect();
-        let user = v[0].to_owned();
-        let repo = v[1].to_owned();
+        let mut split = user_repo.split("/");
+        let user = split
+            .next()
+            .with_context(|| format!("Not found user in `{user_repo}`."))?
+            .to_owned();
+        let repo = split
+            .next()
+            .with_context(|| format!("Not found repo in `{user_repo}`."))?
+            .to_owned();
 
         let dir = match src {
             RepoSource::Github => git_clone(&user, &repo)?,
