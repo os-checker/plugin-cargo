@@ -6,6 +6,7 @@ use testcases::PkgTests;
 
 mod output;
 mod testcases;
+mod os_checker;
 
 pub enum RepoSource {
     Github,
