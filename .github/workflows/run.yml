@@ -14,7 +14,10 @@ env:
   # database branch
   DATABASE: main
   BOT: 1
+  # repos-default.json tag in database release
   TAG_REPOS_DEFAULT: cache-v8.redb
+  # cache.redb tag in database release
+  TAG_CACHE: cache-v11.redb
 
 jobs:
   run:
@@ -34,6 +37,12 @@ jobs:
           wget https://github.com/nextest-rs/nextest/releases/download/cargo-nextest-0.9.81/cargo-nextest-0.9.81-x86_64-unknown-linux-gnu.tar.gz
           tar xzvf cargo-nextest-0.9.81-x86_64-unknown-linux-gnu.tar.gz
           mv cargo-nextest ~/.cargo/bin
+
+      - name: Install os-checker
+        run: |
+          gh release download -R os-checker/database ${{ env.TAG_CACHE }} -p os-checker -D ~/.cargo/bin/
+          chmod +x ~/.cargo/bin/os-checker
+          os-checker layout --help
 
       - name: Install plugin-cargo
         run: cargo install --path .
