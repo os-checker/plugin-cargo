@@ -48,11 +48,13 @@ impl Repo {
         })
     }
 
-    // packages in all repos
+    // packages in all workspaces
     fn packages(&self) -> Vec<&Package> {
         self.workspaces
             .values()
             .flat_map(|ws| ws.workspace_packages())
+            // but don't emit packages that are not checked by os-checker
+            .filter(|pkg| self.pkg_targets.contains_key(pkg.name.as_str()))
             .collect()
     }
 
