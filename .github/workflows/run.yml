@@ -43,7 +43,6 @@ jobs:
 
       - name: Install os-checker
         run: |
-          wget https://github.com/os-checker/database/releases/download/cache-v8.redb/repos-default.json
           wget https://raw.githubusercontent.com/os-checker/os-checker/refs/heads/main/assets/repos-ui.json
           gh release download -R os-checker/database ${{ env.TAG_CACHE }} -p os-checker -D ~/.cargo/bin/
           chmod +x ~/.cargo/bin/os-checker
