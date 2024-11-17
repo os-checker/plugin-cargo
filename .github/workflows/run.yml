@@ -50,7 +50,7 @@ jobs:
           os-checker layout --help
 
       - name: Test os-checker layout --list-targets
-        run: cargo test -- test_sel4 --nocapture && tree -L 2 /tmp/os-checker-plugin-cargo
+        run: cargo test -- test_sel4 --nocapture
 
       - name: Test pkg_targets
         run: cargo test -- test_pkg_targets --nocapture
