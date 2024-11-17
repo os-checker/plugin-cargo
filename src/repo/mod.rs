@@ -22,6 +22,7 @@ pub struct Repo {
 
 impl Repo {
     pub fn new(user_repo: &str) -> Result<Repo> {
+        let _span = error_span!("Repo::new", user_repo).entered();
         let mut split = user_repo.split("/");
         let user = split
             .next()
@@ -38,11 +39,13 @@ impl Repo {
 
         let workspaces = workspaces(&cargo_tomls)?;
 
+        let pkg_targets = os_checker::run(user_repo)?;
+        info!(?pkg_targets);
         Ok(Repo {
             user,
             repo,
             dir,
-            pkg_targets: os_checker::run(user_repo)?,
+            pkg_targets,
             cargo_tomls,
             workspaces,
         })
