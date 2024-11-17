@@ -22,7 +22,6 @@ pub struct Repo {
 
 impl Repo {
     pub fn new(user_repo: &str) -> Result<Repo> {
-        let _span = error_span!("Repo::new", user_repo).entered();
         let mut split = user_repo.split("/");
         let user = split
             .next()
@@ -75,6 +74,7 @@ impl Repo {
             .inspect_err(|err| error!(?err, "Failed to get testcases"))
             .unwrap_or_default();
         let pkgs = self.packages();
+        info!(pkgs = ?pkgs.iter().map(|p| &p.name).collect::<Vec<_>>());
 
         let mut outputs = IndexMap::with_capacity(pkgs.len());
         for pkg in pkgs {
