@@ -35,6 +35,7 @@ impl Repo {
         let dir = local_repo_dir(&user, &repo);
         let mut cargo_tomls = get_cargo_tomls_recursively(&dir);
         cargo_tomls.sort_unstable();
+        info!(?cargo_tomls);
 
         let workspaces = workspaces(&cargo_tomls)?;
 
