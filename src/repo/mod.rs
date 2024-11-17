@@ -38,11 +38,9 @@ impl Repo {
         let dir = local_repo_dir(&user, &repo);
         let mut cargo_tomls = get_cargo_tomls_recursively(&dir);
         cargo_tomls.sort_unstable();
-        info!(?cargo_tomls);
 
         let workspaces = workspaces(&cargo_tomls)?;
 
-        info!(?pkg_targets);
         Ok(Repo {
             user,
             repo,
@@ -59,10 +57,7 @@ impl Repo {
             .values()
             .flat_map(|ws| ws.workspace_packages())
             // but don't emit packages that are not checked by os-checker
-            .filter(|pkg| {
-                info!(pkg.name);
-                self.pkg_targets.contains_key(pkg.name.as_str())
-            })
+            .filter(|pkg| self.pkg_targets.contains_key(pkg.name.as_str()))
             .collect()
     }
 
@@ -82,7 +77,6 @@ impl Repo {
             .inspect_err(|err| error!(?err, "Failed to get testcases"))
             .unwrap_or_default();
         let pkgs = self.packages();
-        info!(pkgs = ?pkgs.iter().map(|p| &p.name).collect::<Vec<_>>());
 
         let mut outputs = IndexMap::with_capacity(pkgs.len());
         for pkg in pkgs {
