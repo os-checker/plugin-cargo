@@ -32,11 +32,22 @@ fn url(pkg: &str) -> String {
     buf
 }
 
+/// NOTE: the result might be spurious due to network failure or invalid text
 pub fn get_release_count(pkg: &str) -> Option<usize> {
-    duct::cmd!("wget", url(pkg), "-O", "-")
-        .read()
-        .ok()
-        .map(|text| text.lines().count())
+    let output = duct::cmd!("wget", url(pkg), "-O", "-")
+        .stderr_capture()
+        .stderr_null()
+        .unchecked()
+        .run()
+        .ok()?;
+
+    Some(
+        std::str::from_utf8(&output.stdout)
+            .ok()?
+            .trim()
+            .lines()
+            .count(),
+    )
 }
 
 #[test]

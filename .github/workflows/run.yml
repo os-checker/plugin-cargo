@@ -49,7 +49,7 @@ jobs:
           chmod +x ~/.cargo/bin/os-checker
           os-checker layout --help
 
-      - name: Test crates.io index
+      - name: Test get_release_count
         run: cargo test -- test_get_release_count --nocapture
 
       # - name: Test os-checker layout --list-targets
