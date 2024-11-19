@@ -50,7 +50,7 @@ jobs:
           os-checker layout --help
 
       - name: Test crates.io index
-        run: cargo test -- test_crates_io_index --nocapture
+        run: cargo test -- test_search_pkg_file --nocapture
 
       # - name: Test os-checker layout --list-targets
       #   run: cargo test -- test_sel4 --nocapture
