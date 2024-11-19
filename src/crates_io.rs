@@ -1,6 +1,3 @@
-use crate::prelude::*;
-use std::sync::LazyLock;
-
 fn url(pkg: &str) -> String {
     const PREFIX: &str =
         "https://raw.githubusercontent.com/rust-lang/crates.io-index/refs/heads/master";
@@ -37,7 +34,8 @@ fn url(pkg: &str) -> String {
 /// None means no release found; 0 is an invalid value because there at least one
 /// release if found.
 pub fn get_release_count(pkg: &str) -> Option<usize> {
-    let output = duct::cmd!("wget", url(pkg), "-O", "-")
+    let url = url(pkg);
+    let output = duct::cmd!("wget", &url, "-O", "-")
         .stdout_capture()
         .stderr_null()
         .unchecked()
@@ -47,7 +45,7 @@ pub fn get_release_count(pkg: &str) -> Option<usize> {
     let text = std::str::from_utf8(&output.stdout).ok()?.trim();
     let count = text.lines().count();
     if count == 0 {
-        error!(pkg, text, "count is an invalid value 0")
+        error!(pkg, url, text, "count is an invalid value 0")
     }
     Some(count)
 }
