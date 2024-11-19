@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use indexmap::Equivalent;
 use serde::Deserialize;
-use std::sync::LazyLock;
+use std::{hash::Hash, sync::LazyLock};
 
 /// Gross diagnostics amount on all targets for each package.
 const URL: &str = "https://raw.githubusercontent.com/os-checker/database/refs/heads/main/ui/home/split/All-Targets.json";
@@ -59,11 +59,17 @@ impl From<Vec<Item>> for DiagnosticsCount {
     }
 }
 
-#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct Key {
     user: String,
     repo: String,
     pkg: String,
+}
+
+impl Hash for Key {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        [&*self.user, &*self.repo, &*self.pkg].hash(state);
+    }
 }
 
 impl Equivalent<Key> for [&'_ str; 3] {
