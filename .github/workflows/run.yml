@@ -12,7 +12,7 @@ env:
   ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
   RUST_LOG: info
   # database branch
-  DATABASE: main
+  DATABASE: debug
   BOT: 1
   # repos-default.json tag in database release
   TAG_REPOS_DEFAULT: cache-v8.redb
@@ -60,7 +60,7 @@ jobs:
 
       - name: Run plugin-cargo
         run: |
-          os-checker-plugin-cargo #os-checker.json
+          os-checker-plugin-cargo os-checker.json
           tree --gitignore -h tmp
 
       - name: Push to database
