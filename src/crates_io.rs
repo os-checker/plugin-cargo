@@ -38,7 +38,6 @@ pub fn get_release_count(pkg: &str) -> Option<usize> {
     let output = duct::cmd!("wget", &url, "-O", "-")
         .stdout_capture()
         .stderr_null()
-        .unchecked()
         .run()
         .ok()?;
 
