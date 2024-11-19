@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use std::sync::LazyLock;
 
+// https://raw.githubusercontent.com/rust-lang/crates.io-index/refs/heads/master/os/-c/os-checker
+
 const REPO: &str = "https://github.com/rust-lang/crates.io-index.git";
 
 /// Returns the pkg file path if exists
@@ -40,9 +42,22 @@ static DIR: LazyLock<Utf8PathBuf> = LazyLock::new(|| {
     dir
 });
 
-#[test]
-fn test_search_pkg_file() -> Result<()> {
-    dbg!(search_pkg_file("os-checker", &DIR).unwrap());
-
-    Ok(())
+fn count(path: &Utf8Path) -> usize {
+    std::fs::read_to_string(path).unwrap().lines().count()
 }
+
+pub fn get_release_count(pkg: &str) -> Option<usize> {
+    search_pkg_file(pkg, &DIR).map(|path| )
+}
+
+#[test]
+fn test_get_release_count()  {
+    dbg!(get_release_count("os-checker"));
+}
+
+
+#[test]
+fn test_search_pkg_file()  {
+    dbg!(search_pkg_file("os-checker", &DIR).unwrap());
+}
+
