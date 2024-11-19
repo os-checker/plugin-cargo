@@ -32,7 +32,10 @@ fn url(pkg: &str) -> String {
     buf
 }
 
-/// NOTE: the result might be spurious due to network failure or invalid text
+/// NOTE: the result might be spurious due to network failure or invalid text;
+///
+/// None means no release found; 0 is an invalid value because there at least one
+/// release if found.
 pub fn get_release_count(pkg: &str) -> Option<usize> {
     let output = duct::cmd!("wget", url(pkg), "-O", "-")
         .stdout_capture()
@@ -41,13 +44,12 @@ pub fn get_release_count(pkg: &str) -> Option<usize> {
         .run()
         .ok()?;
 
-    Some(
-        std::str::from_utf8(&output.stdout)
-            .ok()?
-            .trim()
-            .lines()
-            .count(),
-    )
+    let text = std::str::from_utf8(&output.stdout).ok()?.trim();
+    let count = text.lines().count();
+    if count == 0 {
+        error!(pkg, text, "count is an invalid value 0")
+    }
+    Some(count)
 }
 
 #[test]
