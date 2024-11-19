@@ -114,8 +114,13 @@ impl Repo {
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {
-    static GIT_CLONE_DIR: LazyLock<Utf8PathBuf> =
-        LazyLock::new(|| Utf8PathBuf::from_iter(["/tmp", "os-checker-plugin-cargo"]));
+    static GIT_CLONE_DIR: LazyLock<Utf8PathBuf> = LazyLock::new(|| {
+        let path = Utf8PathBuf::from_iter(["/tmp", "os-checker-plugin-cargo"]);
+        if let Err(err) = std::fs::create_dir_all(&path) {
+            error!(?err, ?path, "directory is not created");
+        };
+        path
+    });
 
     &GIT_CLONE_DIR
 }
