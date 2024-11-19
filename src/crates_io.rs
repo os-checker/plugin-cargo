@@ -35,7 +35,7 @@ fn url(pkg: &str) -> String {
 /// NOTE: the result might be spurious due to network failure or invalid text
 pub fn get_release_count(pkg: &str) -> Option<usize> {
     let output = duct::cmd!("wget", url(pkg), "-O", "-")
-        .stderr_capture()
+        .stdout_capture()
         .stderr_null()
         .unchecked()
         .run()
