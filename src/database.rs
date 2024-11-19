@@ -1,0 +1,77 @@
+use crate::prelude::*;
+use indexmap::Equivalent;
+use serde::Deserialize;
+
+/// Gross diagnostics amount on all targets for each package.
+const URL: &str = "https://raw.githubusercontent.com/os-checker/database/refs/heads/main/ui/home/split/All-Targets.json";
+
+#[derive(Debug, Deserialize)]
+pub struct Item {
+    children: Vec<Child>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Child {
+    data: Data,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Data {
+    user: String,
+    repo: String,
+    pkg: String,
+    total_count: usize,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(from = "Vec<Item>")]
+pub struct DiagnosticsCount {
+    map: IndexMap<Key, usize>,
+}
+
+impl From<Vec<Item>> for DiagnosticsCount {
+    fn from(value: Vec<Item>) -> Self {
+        DiagnosticsCount {
+            map: value
+                .into_iter()
+                .map(|val| {
+                    val.children.into_iter().map(|child| {
+                        let Data {
+                            user,
+                            repo,
+                            pkg,
+                            total_count,
+                        } = child.data;
+                        (Key { user, repo, pkg }, total_count)
+                    })
+                })
+                .flatten()
+                .collect(),
+        }
+    }
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+struct Key {
+    user: String,
+    repo: String,
+    pkg: String,
+}
+
+impl Equivalent<Key> for [&'_ str; 3] {
+    fn equivalent(&self, key: &Key) -> bool {
+        let &[user, repo, pkg] = self;
+        user == key.user && repo == key.repo && pkg == key.pkg
+    }
+}
+
+#[test]
+fn test_all_targets_json() -> Result<()> {
+    let json = duct::cmd!("wget", URL, "-O", "-").read()?;
+
+    let diagnostics_count: DiagnosticsCount = serde_json::from_str(&json)?;
+
+    dbg!(&diagnostics_count);
+
+    Ok(())
+}

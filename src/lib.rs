@@ -11,6 +11,7 @@ extern crate eyre;
 #[macro_use]
 extern crate tracing;
 
+pub mod database;
 pub mod logger;
 pub mod nextest;
 pub mod repo;
