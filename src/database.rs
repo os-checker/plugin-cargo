@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use indexmap::Equivalent;
 use serde::Deserialize;
+use std::sync::LazyLock;
 
 /// Gross diagnostics amount on all targets for each package.
 const URL: &str = "https://raw.githubusercontent.com/os-checker/database/refs/heads/main/ui/home/split/All-Targets.json";
@@ -27,6 +28,13 @@ pub struct Data {
 #[serde(from = "Vec<Item>")]
 pub struct DiagnosticsCount {
     map: IndexMap<Key, usize>,
+}
+
+impl DiagnosticsCount {
+    fn new() -> Result<Self> {
+        let json = duct::cmd!("wget", URL, "-O", "-").read()?;
+        Ok(serde_json::from_str(&json)?)
+    }
 }
 
 impl From<Vec<Item>> for DiagnosticsCount {
@@ -65,13 +73,10 @@ impl Equivalent<Key> for [&'_ str; 3] {
     }
 }
 
+pub static DIAGNOSTICS_COUNT: LazyLock<DiagnosticsCount> =
+    LazyLock::new(|| DiagnosticsCount::new().unwrap());
+
 #[test]
-fn test_all_targets_json() -> Result<()> {
-    let json = duct::cmd!("wget", URL, "-O", "-").read()?;
-
-    let diagnostics_count: DiagnosticsCount = serde_json::from_str(&json)?;
-
-    dbg!(&diagnostics_count);
-
-    Ok(())
+fn test_diagnostics_count() {
+    dbg!(&*DIAGNOSTICS_COUNT);
 }
