@@ -15,6 +15,7 @@ fn search_pkg_file(pkg: &str, dir: &Utf8Path) -> Option<Utf8PathBuf> {
         }
         _ => {
             let (a, b) = pkg.split_at(2);
+            let (b, _) = b.split_at(2);
             &[a, b, pkg]
         }
     };
