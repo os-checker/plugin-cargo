@@ -63,7 +63,7 @@ jobs:
 
       - name: Run plugin-cargo
         run: |
-          os-checker-plugin-cargo os-checker.json
+          os-checker-plugin-cargo #os-checker.json
           tree --gitignore -h tmp
 
       - name: Push to database
