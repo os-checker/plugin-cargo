@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{database::diag_total_count, prelude::*};
 use cargo_metadata::Package;
 use eyre::ContextCompat;
 use output::Output;
@@ -81,7 +81,8 @@ impl Repo {
         let mut outputs = IndexMap::with_capacity(pkgs.len());
         for pkg in pkgs {
             let pkg_name = pkg.name.as_str();
-            let output = Output::new(pkg, test_cases.swap_remove(pkg_name));
+            let mut output = Output::new(pkg, test_cases.swap_remove(pkg_name));
+            output.diag_total_count = diag_total_count([&self.user, &self.repo, pkg_name]);
             assert!(
                 outputs.insert(pkg_name, output).is_none(),
                 "os-checker can't handle duplicated package names in a repo"

@@ -80,3 +80,7 @@ pub static DIAGNOSTICS_COUNT: LazyLock<DiagnosticsCount> =
 fn test_diagnostics_count() {
     dbg!(&*DIAGNOSTICS_COUNT);
 }
+
+pub fn diag_total_count(key: [&str; 3]) -> Option<usize> {
+    DIAGNOSTICS_COUNT.map.get(&key).copied()
+}
