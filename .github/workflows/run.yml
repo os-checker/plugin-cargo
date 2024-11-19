@@ -12,7 +12,7 @@ env:
   ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
   RUST_LOG: info
   # database branch
-  DATABASE: debug
+  DATABASE: main
   BOT: 1
   # repos-default.json tag in database release
   TAG_REPOS_DEFAULT: cache-v8.redb
