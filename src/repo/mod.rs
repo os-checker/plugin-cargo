@@ -1,4 +1,4 @@
-use crate::{database::diag_total_count, prelude::*};
+use crate::{crates_io::get_release_count, database::diag_total_count, prelude::*};
 use cargo_metadata::Package;
 use eyre::ContextCompat;
 use output::Output;
@@ -83,6 +83,7 @@ impl Repo {
             let pkg_name = pkg.name.as_str();
             let mut output = Output::new(pkg, test_cases.swap_remove(pkg_name));
             output.diag_total_count = diag_total_count([&self.user, &self.repo, pkg_name]);
+            output.release_count = get_release_count(pkg_name);
             assert!(
                 outputs.insert(pkg_name, output).is_none(),
                 "os-checker can't handle duplicated package names in a repo"
@@ -114,8 +115,13 @@ impl Repo {
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {
-    static GIT_CLONE_DIR: LazyLock<Utf8PathBuf> =
-        LazyLock::new(|| Utf8PathBuf::from_iter(["/tmp", "os-checker-plugin-cargo"]));
+    static GIT_CLONE_DIR: LazyLock<Utf8PathBuf> = LazyLock::new(|| {
+        let path = Utf8PathBuf::from_iter(["/tmp", "os-checker-plugin-cargo"]);
+        if let Err(err) = std::fs::create_dir_all(&path) {
+            error!(?err, ?path, "directory is not created");
+        };
+        path
+    });
 
     &GIT_CLONE_DIR
 }

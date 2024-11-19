@@ -49,6 +49,9 @@ jobs:
           chmod +x ~/.cargo/bin/os-checker
           os-checker layout --help
 
+      # - name: Test get_release_count
+      #   run: cargo test -- test_get_release_count --nocapture
+      #
       # - name: Test os-checker layout --list-targets
       #   run: cargo test -- test_sel4 --nocapture
       #
