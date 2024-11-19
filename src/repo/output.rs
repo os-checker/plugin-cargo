@@ -20,6 +20,7 @@ pub struct Output {
     pub keywords: Vec<String>,
     pub categories: Vec<String>,
     pub os_categories: Vec<String>,
+    pub diag_total_count: Option<usize>,
 }
 
 impl Output {
@@ -53,6 +54,7 @@ impl Output {
                     )
                 })
                 .unwrap_or_default(),
+            diag_total_count: None,
         }
     }
 }
