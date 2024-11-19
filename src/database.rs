@@ -42,7 +42,7 @@ impl From<Vec<Item>> for DiagnosticsCount {
         DiagnosticsCount {
             map: value
                 .into_iter()
-                .map(|val| {
+                .flat_map(|val| {
                     val.children.into_iter().map(|child| {
                         let Data {
                             user,
@@ -53,7 +53,6 @@ impl From<Vec<Item>> for DiagnosticsCount {
                         (Key { user, repo, pkg }, total_count)
                     })
                 })
-                .flatten()
                 .collect(),
         }
     }
