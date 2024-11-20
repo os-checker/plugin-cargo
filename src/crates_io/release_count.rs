@@ -78,17 +78,7 @@ fn parse_data(index_file: &str) -> Result<Vec<Data>> {
         .collect()
 }
 
-/// None means no release found; 0 is an invalid value because there at least one
-/// release if found.
-pub fn get_release_count(pkg: &str) -> Option<usize> {
-    let count = IndexFile::new(pkg).ok()?.data.len();
-    if count == 0 {
-        error!(pkg, "count is an invalid value 0");
-    }
-    Some(count)
-}
-
 #[test]
 fn test_get_release_count() {
-    dbg!(get_release_count("os-checker"));
+    dbg!(IndexFile::new("os-checker").unwrap().release_count());
 }
