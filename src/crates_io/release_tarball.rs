@@ -1,5 +1,7 @@
+use super::IndexFile;
 use crate::{prelude::*, repo::local_base_dir};
 use cargo_metadata::semver::Version;
+use eyre::ContextCompat;
 use std::os::linux::fs::MetadataExt;
 
 #[derive(Debug)]
@@ -43,9 +45,24 @@ fn url(pkg: &str, version: &Version) -> String {
     format!("{PREFIX}/{pkg}/{version}/download")
 }
 
-pub fn get_last_release_info(pkg: &str, version: &Version) -> Result<TarballInfo> {
+fn get_last_release_info(pkg: &str, version: &Version) -> Result<TarballInfo> {
     let tarball = download_tarball(pkg, version)?;
     Ok(TarballInfo::new(&tarball)?)
+}
+
+impl IndexFile {
+    pub fn get_last_release_info(&mut self) -> Result<()> {
+        let last = self.data.last();
+        let last = last.with_context(|| format!(" index file is empty"))?;
+        self.tarball = Some(get_last_release_info(&self.pkg, &last.vers)?);
+        Ok(())
+    }
+
+    pub fn last_release_size_and_time(&self) -> Option<(u64, Timestamp)> {
+        self.tarball
+            .as_ref()
+            .map(|tarball| (tarball.size, tarball.modified))
+    }
 }
 
 #[test]

@@ -2,6 +2,8 @@ use crate::prelude::*;
 use cargo_metadata::semver::Version;
 use serde::Deserialize;
 
+use super::release_tarball::TarballInfo;
+
 fn url(pkg: &str) -> String {
     const PREFIX: &str = "https://index.crates.io";
 
@@ -39,7 +41,9 @@ pub struct Data {
 
 #[derive(Debug)]
 pub struct IndexFile {
-    data: Vec<Data>,
+    pub pkg: String,
+    pub data: Vec<Data>,
+    pub tarball: Option<TarballInfo>,
 }
 
 impl IndexFile {
@@ -55,8 +59,15 @@ impl IndexFile {
 
         let text = std::str::from_utf8(&output.stdout)?.trim();
         Ok(IndexFile {
+            pkg: pkg.to_owned(),
             data: parse_data(text)?,
+            tarball: None,
         })
+    }
+
+    ///  0 is an invalid value because there at least one release if found.
+    pub fn release_count(&self) -> usize {
+        self.data.len()
     }
 }
 
