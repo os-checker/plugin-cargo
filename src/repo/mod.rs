@@ -18,6 +18,7 @@ pub struct Repo {
     pub pkg_targets: os_checker::PkgTargets,
     pub cargo_tomls: Vec<Utf8PathBuf>,
     pub workspaces: Workspaces,
+    pub last_commit_time: String,
 }
 
 impl Repo {
@@ -41,6 +42,8 @@ impl Repo {
 
         let workspaces = workspaces(&cargo_tomls)?;
 
+        let last_commit_time = last_commit_time(&dir)?;
+
         Ok(Repo {
             user,
             repo,
@@ -48,6 +51,7 @@ impl Repo {
             pkg_targets,
             cargo_tomls,
             workspaces,
+            last_commit_time,
         })
     }
 
@@ -81,9 +85,15 @@ impl Repo {
         let mut outputs = IndexMap::with_capacity(pkgs.len());
         for pkg in pkgs {
             let pkg_name = pkg.name.as_str();
-            let mut output = Output::new(pkg, test_cases.swap_remove(pkg_name));
+
+            let mut output = Output::new(
+                pkg,
+                test_cases.swap_remove(pkg_name),
+                &self.last_commit_time,
+            );
             output.diag_total_count = diag_total_count([&self.user, &self.repo, pkg_name]);
             output.release_count = get_release_count(pkg_name);
+
             assert!(
                 outputs.insert(pkg_name, output).is_none(),
                 "os-checker can't handle duplicated package names in a repo"
@@ -112,6 +122,17 @@ impl Repo {
         std::fs::remove_dir_all(&self.dir)?;
         Ok(())
     }
+}
+
+fn last_commit_time(root: &Utf8Path) -> Result<String> {
+    let cmd = duct::cmd!(
+        "git",
+        "log",
+        "-1",
+        "--date=format:%Y-%m-%dT%H:%M:%SZ",
+        "--pretty=format:%cd"
+    );
+    Ok(cmd.dir(root).read()?.trim().to_owned())
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {
@@ -181,4 +202,9 @@ fn test_pkg_targets() -> Result<()> {
     dbg!(&repo.pkg_targets);
     repo.remove_local_dir()?;
     Ok(())
+}
+
+#[test]
+fn test_last_commit_time() {
+    dbg!(last_commit_time(".".into()).unwrap());
 }
