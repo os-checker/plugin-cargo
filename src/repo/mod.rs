@@ -127,7 +127,7 @@ fn last_commit_time(root: &Utf8Path) -> Result<Timestamp> {
     let cmd = duct::cmd!("git", "log", "-1", "--pretty=format:%ct");
     // git log -1 --format="%ct"
     let unix_timestamp = cmd.dir(root).read()?.trim().parse()?;
-    Ok(Timestamp::from_millisecond(unix_timestamp)?)
+    Ok(Timestamp::from_second(unix_timestamp)?)
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {
