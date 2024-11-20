@@ -24,6 +24,8 @@ pub struct Output {
     pub last_commit_time: String,
     /// crates.io 发版次数
     pub release_count: Option<usize>,
+    pub last_release_size: Option<u64>,
+    pub last_release_time: Option<String>,
 }
 
 impl Output {
@@ -48,6 +50,8 @@ impl Output {
             diag_total_count: None,
             last_commit_time: last_commit_time.to_owned(),
             release_count: None,
+            last_release_size: None,
+            last_release_time: None,
         }
     }
 }

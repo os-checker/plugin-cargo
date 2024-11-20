@@ -87,15 +87,25 @@ impl Repo {
         let mut outputs = IndexMap::with_capacity(pkgs.len());
         for pkg in pkgs {
             let pkg_name = pkg.name.as_str();
+            let _span = error_span!("output", pkg = pkg_name).entered();
 
             let mut output = Output::new(pkg, test_cases.swap_remove(pkg_name), &last_commit_time);
             output.diag_total_count = diag_total_count([&self.user, &self.repo, pkg_name]);
 
             match IndexFile::new(pkg_name) {
-                Ok(index_file) => {
+                Ok(mut index_file) => {
                     output.release_count = Some(index_file.release_count());
+                    match index_file.get_last_release_info() {
+                        Ok(()) => {
+                            if let Some((size, time)) = index_file.last_release_size_and_time() {
+                                output.last_release_size = Some(size);
+                                output.last_release_time = Some(time.to_string());
+                            }
+                        }
+                        Err(err) => error!(?err),
+                    }
                 }
-                Err(err) => error!(pkg_name, ?err, "Unable to handle index file"),
+                Err(err) => error!(?err, "Unable to handle index file"),
             };
 
             assert!(
