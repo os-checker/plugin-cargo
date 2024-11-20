@@ -20,6 +20,7 @@ pub struct Output {
     pub keywords: Vec<String>,
     pub categories: Vec<String>,
     pub os_categories: Vec<String>,
+    pub rust_version: Option<String>,
     pub diag_total_count: Option<usize>,
     /// crates.io 发版次数
     pub release_count: Option<usize>,
@@ -56,6 +57,7 @@ impl Output {
                     )
                 })
                 .unwrap_or_default(),
+            rust_version: pkg.rust_version.clone().map(|v| v.to_string()),
             diag_total_count: None,
             release_count: None,
         }
