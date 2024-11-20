@@ -1,3 +1,4 @@
 [
-  "qclic/fdt-parser"
+  "qclic/fdt-parser",
+  "os-checker/os-checker"
 ]
