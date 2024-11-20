@@ -1,6 +1,5 @@
 fn url(pkg: &str) -> String {
-    const PREFIX: &str =
-        "https://raw.githubusercontent.com/rust-lang/crates.io-index/refs/heads/master";
+    const PREFIX: &str = "https://index.crates.io";
 
     // ref: https://doc.rust-lang.org/cargo/reference/registry-index.html#index-files
     let components = match pkg.len() {
