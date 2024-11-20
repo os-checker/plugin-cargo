@@ -18,7 +18,7 @@ env:
   TAG_REPOS_DEFAULT: cache-v8.redb
   # cache.redb tag in database release
   TAG_CACHE: cache-v11.redb
-  CONFIGS: "repos-default.json repos-ui.json"
+  CONFIGS: repos-default.json repos-ui.json repos.json
 
 jobs:
   run:
