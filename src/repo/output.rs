@@ -19,7 +19,6 @@ pub struct Output {
     pub homepage: Option<String>,
     pub keywords: Vec<String>,
     pub categories: Vec<String>,
-    pub os_categories: Vec<String>,
     pub rust_version: Option<String>,
     pub diag_total_count: Option<usize>,
     /// crates.io 发版次数
@@ -44,19 +43,6 @@ impl Output {
             homepage: pkg.homepage.clone(),
             keywords: pkg.keywords.clone(),
             categories: pkg.categories.clone(),
-            os_categories: pkg
-                .metadata
-                .get("os")
-                .and_then(|os| {
-                    Some(
-                        os.get("categories")?
-                            .as_array()?
-                            .iter()
-                            .filter_map(|x| x.as_str().map(String::from))
-                            .collect(),
-                    )
-                })
-                .unwrap_or_default(),
             rust_version: pkg.rust_version.clone().map(|v| v.to_string()),
             diag_total_count: None,
             release_count: None,
