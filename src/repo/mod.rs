@@ -1,6 +1,7 @@
 use crate::{crates_io::get_release_count, database::diag_total_count, prelude::*};
 use cargo_metadata::Package;
 use eyre::ContextCompat;
+use jiff::Timestamp;
 use output::Output;
 use std::sync::LazyLock;
 use testcases::PkgTests;
@@ -18,7 +19,7 @@ pub struct Repo {
     pub pkg_targets: os_checker::PkgTargets,
     pub cargo_tomls: Vec<Utf8PathBuf>,
     pub workspaces: Workspaces,
-    pub last_commit_time: String,
+    pub last_commit_time: Timestamp,
 }
 
 impl Repo {
@@ -82,15 +83,13 @@ impl Repo {
             .unwrap_or_default();
         let pkgs = self.packages();
 
+        let last_commit_time = self.last_commit_time.to_string();
+
         let mut outputs = IndexMap::with_capacity(pkgs.len());
         for pkg in pkgs {
             let pkg_name = pkg.name.as_str();
 
-            let mut output = Output::new(
-                pkg,
-                test_cases.swap_remove(pkg_name),
-                &self.last_commit_time,
-            );
+            let mut output = Output::new(pkg, test_cases.swap_remove(pkg_name), &last_commit_time);
             output.diag_total_count = diag_total_count([&self.user, &self.repo, pkg_name]);
             output.release_count = get_release_count(pkg_name);
 
@@ -124,15 +123,11 @@ impl Repo {
     }
 }
 
-fn last_commit_time(root: &Utf8Path) -> Result<String> {
-    let cmd = duct::cmd!(
-        "git",
-        "log",
-        "-1",
-        "--date=format:%Y-%m-%dT%H:%M:%SZ",
-        "--pretty=format:%cd"
-    );
-    Ok(cmd.env("TZ", "UTC").dir(root).read()?.trim().to_owned())
+fn last_commit_time(root: &Utf8Path) -> Result<Timestamp> {
+    let cmd = duct::cmd!("git", "log", "-1", "--pretty=format:%ct");
+    // git log -1 --format="%ct"
+    let unix_timestamp = cmd.dir(root).read()?.trim().parse()?;
+    Ok(Timestamp::from_millisecond(unix_timestamp)?)
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {
