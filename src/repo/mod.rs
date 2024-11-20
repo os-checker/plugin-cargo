@@ -1,7 +1,6 @@
 use crate::{crates_io::get_release_count, database::diag_total_count, prelude::*};
 use cargo_metadata::Package;
 use eyre::ContextCompat;
-use jiff::Timestamp;
 use output::Output;
 use std::sync::LazyLock;
 use testcases::PkgTests;
