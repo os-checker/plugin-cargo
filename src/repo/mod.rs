@@ -132,7 +132,7 @@ fn last_commit_time(root: &Utf8Path) -> Result<String> {
         "--date=format:%Y-%m-%dT%H:%M:%SZ",
         "--pretty=format:%cd"
     );
-    Ok(cmd.dir(root).read()?.trim().to_owned())
+    Ok(cmd.env("TZ", "UTC").dir(root).read()?.trim().to_owned())
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {
