@@ -41,7 +41,9 @@ pub fn repos() -> Result<Vec<String>> {
             let path = Utf8Path::new(list_json);
             fs::read_to_string(path)?
         }
-        None => duct::cmd!("os-checker", "config", "--list-repos").read()?,
+        None => duct::cmd!("os-checker", "config", "--list-repos")
+            .env_remove("RUST_LOG")
+            .read()?,
     };
 
     info!(text);
