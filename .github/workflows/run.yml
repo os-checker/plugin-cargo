@@ -16,9 +16,7 @@ env:
   BOT: 1
   # repos-default.json tag in database release
   TAG_REPOS_DEFAULT: cache-v8.redb
-  # cache.redb tag in database release
-  TAG_CACHE: cache-v11.redb
-  CONFIGS: repos-default.json repos-ui.json repos.json
+  OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
 
 jobs:
   run:
@@ -29,12 +27,10 @@ jobs:
         with:
           components: rustfmt, clippy
 
-      - name: Generate list.json
+      - name: Fetch os-checker config JSONs
         run: |
           wget https://github.com/os-checker/database/releases/download/${{ env.TAG_REPOS_DEFAULT }}/repos-default.json
-          jq 'to_entries | map(.key) + ["os-checker/os-checker"]' repos-default.json > list.json
-          tree --help
-          tree --gitignore -h
+          wget https://raw.githubusercontent.com/os-checker/os-checker/refs/heads/main/assets/repos-ui.json
 
       - name: Install cargo-nextest
         run: |
@@ -44,10 +40,9 @@ jobs:
 
       - name: Install os-checker
         run: |
-          wget https://raw.githubusercontent.com/os-checker/os-checker/refs/heads/main/assets/repos-ui.json
-          gh release download -R os-checker/database ${{ env.TAG_CACHE }} -p os-checker -D ~/.cargo/bin/
+          wget https://github.com/os-checker/database/releases/download/precompiled-checkers/os-checker -O ~/.cargo/bin/os-checker
           chmod +x ~/.cargo/bin/os-checker
-          os-checker layout --help
+          os-checker config --list-repos
 
       # - name: Test get_release_count
       #   run: cargo test -- test_get_release_count --nocapture

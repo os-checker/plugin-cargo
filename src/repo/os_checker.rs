@@ -6,30 +6,22 @@ use os_checker_types::layout::ListTargets;
 pub type PkgTargets = IndexMap<XString, Vec<String>>;
 
 pub fn run(user_repo: &str) -> Result<PkgTargets> {
-    // multiple config paths are separated by ` `
-    let configs =
-        std::env::var("CONFIGS").with_context(|| "Must specify `CONFIGS` environment variable.")?;
-
     let dir = local_base_dir();
-    let mut args = vec![
+
+    // OS_CHECKER_CONFIGS is inherented
+    let output = cmd!(
+        "os-checker",
         "layout",
         "--base-dir",
-        dir.as_str(),
+        dir,
         "--list-targets",
         user_repo,
-    ];
-
-    for config in configs.split(" ").map(|s| s.trim()) {
-        if !config.is_empty() {
-            args.extend(["--config", config]);
-        }
-    }
-
-    let output = cmd("os-checker", args)
-        .stdout_capture()
-        .stderr_capture()
-        .unchecked()
-        .run()?;
+    )
+    .env_remove("RUST_LOG")
+    .stdout_capture()
+    .stderr_capture()
+    .unchecked()
+    .run()?;
 
     ensure!(
         output.status.success(),
