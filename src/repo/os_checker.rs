@@ -17,6 +17,7 @@ pub fn run(user_repo: &str) -> Result<PkgTargets> {
         "--list-targets",
         user_repo,
     )
+    .env_remove("RUST_LOG")
     .stdout_capture()
     .stderr_capture()
     .unchecked()
