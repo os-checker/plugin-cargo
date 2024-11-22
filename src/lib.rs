@@ -44,5 +44,6 @@ pub fn repos() -> Result<Vec<String>> {
         None => duct::cmd!("os-checker", "config", "--list-repos").read()?,
     };
 
+    info!(text);
     Ok(serde_json::from_str(&text)?)
 }
