@@ -2,6 +2,12 @@
 name = "os-checker-plugin-cargo"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+exclude = ["*.json", "*.sh", ".github", "tests"]
+description = """
+A plugin to os-checker to collect basic information from cargo and git.
+"""
+repository = "https://github.com/os-checker/plugin-cargo"
 
 [dependencies]
 jiff = "0.1"
