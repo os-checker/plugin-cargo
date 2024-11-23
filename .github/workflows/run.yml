@@ -6,6 +6,8 @@ on:
   push:
     branches: [ main, feat/* ]
 
+permissions: write-all
+
 env:
   CARGO_TERM_COLOR: always
   # GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -21,7 +23,6 @@ env:
 jobs:
   run:
     runs-on: ubuntu-latest
-    permissions: write-all
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
