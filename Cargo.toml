@@ -10,7 +10,7 @@ A plugin to os-checker to collect basic information from cargo and git.
 repository = "https://github.com/os-checker/plugin-cargo"
 
 [dependencies]
-plugin = { version = "0.1.1", package = "os-checker-plugin" }
+plugin = { version = "0.1.2", package = "os-checker-plugin" }
 os-checker-types = "0.4.1"
 
 serde = "1"
