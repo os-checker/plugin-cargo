@@ -14,11 +14,12 @@ env:
   GITHUB_TOKEN: ${{ github.token }}
   RUST_LOG: info
   # database branch
-  DATABASE: main
+  DATABASE: debug
   BOT: 1
   # repos-default.json tag in database release
   TAG_REPOS_DEFAULT: cache-v8.redb
-  OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
+  OS_CHECKER_CONFIGS: repos.json
+  # OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
 
 jobs:
   run:
@@ -33,6 +34,7 @@ jobs:
         run: |
           wget https://github.com/os-checker/database/releases/download/${{ env.TAG_REPOS_DEFAULT }}/repos-default.json
           wget https://raw.githubusercontent.com/os-checker/os-checker/refs/heads/main/assets/repos-ui.json
+          cat '{"os-checker/os-checker":{}}' > repos.json
 
       - name: Install cargo-nextest
         run: |
