@@ -1,26 +1,17 @@
-pub mod prelude {
-    pub use camino::{Utf8Path, Utf8PathBuf};
-    pub use cargo_metadata::Metadata;
-    pub use compact_str::CompactString as XString;
-    pub use eyre::{Context, Result};
-    pub use indexmap::IndexMap;
-    pub use jiff::Timestamp;
-}
-
 #[macro_use]
 extern crate eyre;
 #[macro_use]
 extern crate tracing;
 
+use plugin::prelude::*;
+
 pub mod crates_io;
 pub mod database;
-pub mod logger;
 pub mod nextest;
 pub mod repo;
 
 pub const BASE: &str = "tmp";
 
-use prelude::*;
 use std::fs;
 
 pub fn write_json<T: serde::Serialize>(path: &Utf8Path, val: &T) -> Result<()> {

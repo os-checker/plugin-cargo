@@ -1,7 +1,8 @@
 use super::IndexFile;
-use crate::{prelude::*, repo::local_base_dir};
+use crate::repo::local_base_dir;
 use cargo_metadata::semver::Version;
 use eyre::ContextCompat;
+use plugin::prelude::*;
 use std::os::linux::fs::MetadataExt;
 
 #[derive(Debug)]

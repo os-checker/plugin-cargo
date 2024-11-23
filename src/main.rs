@@ -1,4 +1,5 @@
-use os_checker_plugin_cargo::{prelude::*, *};
+use os_checker_plugin_cargo::{repo, repos, write_json, BASE};
+use plugin::{logger, prelude::*};
 
 #[macro_use]
 extern crate tracing;

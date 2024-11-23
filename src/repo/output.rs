@@ -1,5 +1,6 @@
 use super::testcases::TestCases;
 use cargo_metadata::Package;
+use plugin::prelude::*;
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]

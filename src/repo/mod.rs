@@ -1,7 +1,8 @@
-use crate::{crates_io::IndexFile, database::diag_total_count, prelude::*};
+use crate::{crates_io::IndexFile, database::diag_total_count};
 use cargo_metadata::Package;
 use eyre::ContextCompat;
 use output::Output;
+use plugin::prelude::*;
 use std::sync::LazyLock;
 use testcases::PkgTests;
 
