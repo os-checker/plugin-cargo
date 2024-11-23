@@ -8,8 +8,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-  ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+  # GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+  GITHUB_TOKEN: ${{ github.token }}
   RUST_LOG: info
   # database branch
   DATABASE: main
@@ -21,6 +21,7 @@ env:
 jobs:
   run:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
@@ -69,7 +70,7 @@ jobs:
           git config --global user.email "zjp-CN[bot]@users.noreply.github.com"
 
           echo "正在 clone os-checker/database"
-          git clone https://x-access-token:${{ env.ACCESS_TOKEN }}@github.com/os-checker/database.git
+          git clone https://x-access-token:${{ env.GITHUB_TOKEN }}@github.com/os-checker/database.git
           echo "成功 clone os-checker/database"
 
           cd database
