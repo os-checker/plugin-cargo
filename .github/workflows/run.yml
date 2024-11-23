@@ -73,7 +73,9 @@ jobs:
           git config --global user.email "zjp-CN[bot]@users.noreply.github.com"
 
           echo "正在 clone os-checker/database"
-          git clone https://x-access-token:${{ env.GITHUB_TOKEN }}@github.com/os-checker/database.git
+          # git clone https://x-access-token:${{ env.GITHUB_TOKEN }}@github.com/os-checker/database.git
+          gh repo clone os-checker/database
+          gh auth setup-git
           echo "成功 clone os-checker/database"
 
           cd database
