@@ -128,7 +128,7 @@ impl Repo {
     }
 
     fn write_json(&self, json: &serde_json::Value) -> Result<()> {
-        let mut path = Utf8PathBuf::from_iter([crate::BASE, &self.user, &self.repo]);
+        let mut path = Utf8PathBuf::from_iter([crate::BASE_DIR, &self.user, &self.repo]);
         path.set_extension("json");
         write_json(&path, json)
     }
