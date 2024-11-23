@@ -6,13 +6,8 @@ on:
   push:
     branches: [ main, feat/* ]
 
-permissions: write-all
-
 env:
   CARGO_TERM_COLOR: always
-  # GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-  GITHUB_TOKEN: ${{ github.token }}
-  GH_TOKEN: ${{ github.token }}
   RUST_LOG: info
   # database branch
   DATABASE: debug
@@ -69,6 +64,7 @@ jobs:
       - name: Push to database
         env:
           PLUGIN_PATH: plugin/cargo
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           git config --global user.name "zjp-CN[bot]"
           git config --global user.email "zjp-CN[bot]@users.noreply.github.com"
