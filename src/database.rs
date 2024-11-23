@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use indexmap::Equivalent;
+use plugin::prelude::*;
 use serde::Deserialize;
 use std::{hash::Hash, sync::LazyLock};
 

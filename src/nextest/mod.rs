@@ -1,6 +1,6 @@
 //! Ref: https://github.com/nextest-rs/nextest/blob/cb67e450e0fa2803f0089ffc9189c34ecd355f13/nextest-runner/src/reporter/structured/libtest.rs#L116
-use crate::prelude::*;
 use indexmap::Equivalent;
+use plugin::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::hash::Hash;
 

@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use cargo_metadata::semver::Version;
+use plugin::prelude::*;
 use serde::Deserialize;
 
 use super::release_tarball::TarballInfo;

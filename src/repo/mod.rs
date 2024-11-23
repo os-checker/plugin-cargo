@@ -1,7 +1,8 @@
-use crate::{crates_io::IndexFile, database::diag_total_count, prelude::*};
+use crate::{crates_io::IndexFile, database::diag_total_count};
 use cargo_metadata::Package;
 use eyre::ContextCompat;
 use output::Output;
+use plugin::{prelude::*, write_json};
 use std::sync::LazyLock;
 use testcases::PkgTests;
 
@@ -129,7 +130,7 @@ impl Repo {
     fn write_json(&self, json: &serde_json::Value) -> Result<()> {
         let mut path = Utf8PathBuf::from_iter([crate::BASE, &self.user, &self.repo]);
         path.set_extension("json");
-        crate::write_json(&path, json)
+        write_json(&path, json)
     }
 
     pub fn remove_local_dir(self) -> Result<()> {

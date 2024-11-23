@@ -1,9 +1,6 @@
-use crate::{
-    nextest::{run_testcases, Event, Report},
-    prelude::*,
-};
+use crate::nextest::{run_testcases, Event, Report};
 use nextest_metadata::{RustTestSuiteSummary, TestListSummary};
-use serde::Serialize;
+use plugin::prelude::*;
 
 fn test_list(dir: &Utf8Path) -> Result<TestListSummary> {
     let mut command = nextest_metadata::ListCommand::new();

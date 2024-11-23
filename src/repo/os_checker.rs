@@ -1,7 +1,6 @@
 use super::local_base_dir;
-use crate::prelude::*;
-use duct::cmd;
 use os_checker_types::layout::ListTargets;
+use plugin::prelude::*;
 
 pub type PkgTargets = IndexMap<XString, Vec<String>>;
 
