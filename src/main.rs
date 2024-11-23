@@ -1,4 +1,4 @@
-use os_checker_plugin_cargo::{repo, BASE};
+use os_checker_plugin_cargo::{repo, BASE_DIR};
 use plugin::{logger, prelude::*, repos, write_json};
 
 #[macro_use]
@@ -26,7 +26,10 @@ fn main() -> Result<()> {
         };
     }
 
-    write_json(&Utf8PathBuf::from_iter([BASE, "summaries.json"]), &outputs)?;
+    write_json(
+        &Utf8PathBuf::from_iter([BASE_DIR, "summaries.json"]),
+        &outputs,
+    )?;
 
     Ok(())
 }

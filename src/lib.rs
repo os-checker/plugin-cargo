@@ -8,4 +8,4 @@ pub mod database;
 pub mod nextest;
 pub mod repo;
 
-pub const BASE: &str = "tmp";
+pub const BASE_DIR: &str = "cargo";
