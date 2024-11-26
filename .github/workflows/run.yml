@@ -28,7 +28,9 @@ jobs:
 
       - name: Fetch os-checker config JSONs
         run: |
-          wget https://github.com/os-checker/database/releases/download/${{ env.TAG_REPOS_DEFAULT }}/repos-default.json
+          gh release download -R kern-crates/.github -p os-checker_config.json
+          # temporarily disable qclic/e1000e-frame
+          jq 'del(."qclic/e1000e-frame")' os-checker_config.json > repos-default.json
           wget https://raw.githubusercontent.com/os-checker/os-checker/refs/heads/main/assets/repos-ui.json
           echo '{"os-checker/os-checker":{}}' > repos.json
 
