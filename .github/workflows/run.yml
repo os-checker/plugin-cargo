@@ -12,6 +12,7 @@ env:
   # database branch
   DATABASE: main
   BOT: 1
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
   # OS_CHECKER_CONFIGS: repos.json
   OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
 
@@ -64,7 +65,6 @@ jobs:
       - name: Push to database
         env:
           PLUGIN_PATH: plugin/cargo
-          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           git config --global user.name "zjp-CN[bot]"
           git config --global user.email "zjp-CN[bot]@users.noreply.github.com"
