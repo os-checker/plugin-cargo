@@ -6,6 +6,7 @@ use plugin::{prelude::*, write_json};
 use std::sync::LazyLock;
 use testcases::PkgTests;
 
+mod miri;
 mod os_checker;
 mod output;
 mod testcases;

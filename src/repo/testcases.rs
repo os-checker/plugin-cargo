@@ -96,10 +96,12 @@ pub struct TestCase {
     status: Option<Event>,
     duration_ms: Option<u32>,
     error: Option<String>,
+    miri: Option<String>,
 }
 
 impl TestCase {
-    pub fn new(name: &str, pkg_name: &str, bin_name: &str, report: &Report) -> Self {
+    pub fn new(name: &str, pkg_name: &str, kind: &str, bin_name: &str, report: &Report) -> Self {
+        let miri = super::miri::cargo_miri(pkg_name, kind, bin_name, name);
         let (status, duration_ms, error) = report.get_test_case(&[pkg_name, bin_name, name]);
         let name = name.to_owned();
         Self {
@@ -107,6 +109,7 @@ impl TestCase {
             status,
             duration_ms,
             error,
+            miri,
         }
     }
 }
@@ -116,10 +119,11 @@ impl TestBinary {
         let binary = &ele.binary;
         let pkg_name = &*ele.package_name;
         let bin_name = &*binary.binary_name;
+        let kind = &*binary.kind.0;
         let testcases: Vec<_> = ele
             .test_cases
             .keys()
-            .map(|name| TestCase::new(name, pkg_name, bin_name, report))
+            .map(|name| TestCase::new(name, pkg_name, kind, bin_name, report))
             .collect();
         let (failed, duration_ms) = testcases.iter().fold((0, 0), |(s, d), t| {
             let d = d + t.duration_ms.unwrap_or(0) as usize;
