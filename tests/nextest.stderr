@@ -1,10 +1,94 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.53s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.42s
 ------------
- Nextest run ID d8f6bdff-9e6c-41eb-b96b-384a7faf132f with nextest profile: default
-    Starting 4 tests across 3 binaries
-        PASS [   0.011s] os-checker-plugin-cargo from_lib
-        PASS [   0.012s] os-checker-plugin-cargo::t1 from_t1
-        PASS [   0.013s] os-checker-plugin-cargo::bin/os-checker-plugin-cargo from_main
-        PASS [   0.504s] os-checker-plugin-cargo repo::test_cargo_tomls
+ Nextest run ID 0fba453a-de6b-4ee7-9fa0-4eaea09c0d81 with nextest profile: default
+    Starting 12 tests across 3 binaries
+        PASS [   1.060s] os-checker-plugin-cargo crates_io::release_count::test_get_release_count
+        PASS [   1.295s] os-checker-plugin-cargo crates_io::release_tarball::test_tarball_info
+        FAIL [   0.005s] os-checker-plugin-cargo nextest::parse_stream
+
+--- OUTPUT:              os-checker-plugin-cargo nextest::parse_stream ---
+
+running 1 test
+[src/nextest/mod.rs:110:5] &reports = []
+thread 'nextest::parse_stream' panicked at src/nextest/mod.rs:111:5:
+assertion failed: !reports.is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test nextest::parse_stream ... FAILED
+
+failures:
+
+failures:
+    nextest::parse_stream
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+
+        PASS [   0.005s] os-checker-plugin-cargo nextest::parse_test_event
+        PASS [   1.016s] os-checker-plugin-cargo database::test_diagnostics_count
+        PASS [   0.005s] os-checker-plugin-cargo nextest::string_to_name
+        FAIL [   0.042s] os-checker-plugin-cargo repo::os_checker::test_sel4
+
+--- OUTPUT:              os-checker-plugin-cargo repo::os_checker::test_sel4 ---
+
+running 1 test
+Error: Error: 
+   0: seL4/rust-sel4 is not in config repos:
+      {"os-checker/os-checker"}
+
+Location:
+   src/config/mod.rs:209
+
+Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
+Run with RUST_BACKTRACE=full to include source snippets.
+
+
+Location:
+    src/repo/os_checker.rs:25:5
+test repo::os_checker::test_sel4 ... FAILED
+
+failures:
+
+failures:
+    repo::os_checker::test_sel4
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.04s
+
+
+        PASS [   0.311s] os-checker-plugin-cargo repo::test_cargo_tomls
+        PASS [   0.031s] os-checker-plugin-cargo repo::test_last_commit_time
+        FAIL [   0.010s] os-checker-plugin-cargo repo::test_pkg_targets
+
+--- OUTPUT:              os-checker-plugin-cargo repo::test_pkg_targets ---
+
+running 1 test
+Error: Error: 
+   0: seL4/rust-sel4 is not in config repos:
+      {"os-checker/os-checker"}
+
+Location:
+   src/config/mod.rs:209
+
+Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
+Run with RUST_BACKTRACE=full to include source snippets.
+
+
+Location:
+    src/repo/os_checker.rs:25:5
+test repo::test_pkg_targets ... FAILED
+
+failures:
+
+failures:
+    repo::test_pkg_targets
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+
+        PASS [   0.005s] os-checker-plugin-cargo::t1 from_t1
+        PASS [  26.510s] os-checker-plugin-cargo nextest::run_and_parse
 ------------
-     Summary [   0.508s] 4 tests run: 4 passed, 0 skipped
+     Summary [  27.816s] 12 tests run: 9 passed, 3 failed, 0 skipped
+        FAIL [   0.005s] os-checker-plugin-cargo nextest::parse_stream
+        FAIL [   0.042s] os-checker-plugin-cargo repo::os_checker::test_sel4
+        FAIL [   0.010s] os-checker-plugin-cargo repo::test_pkg_targets
+error: test run failed

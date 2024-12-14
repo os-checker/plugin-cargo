@@ -1,14 +1,28 @@
 {"type":"suite","event":"started","test_count":1,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"t1","kind":"test"}}
 {"type":"test","event":"started","name":"os-checker-plugin-cargo::t1$from_t1"}
-{"type":"test","event":"ok","name":"os-checker-plugin-cargo::t1$from_t1","exec_time":0.012385435}
-{"type":"suite","event":"ok","passed":1,"failed":0,"ignored":0,"measured":0,"filtered_out":0,"exec_time":0.012385435,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"t1","kind":"test"}}
-{"type":"suite","event":"started","test_count":1,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os-checker-plugin-cargo","kind":"bin"}}
-{"type":"test","event":"started","name":"os-checker-plugin-cargo::os-checker-plugin-cargo$from_main"}
-{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os-checker-plugin-cargo$from_main","exec_time":0.012558923}
-{"type":"suite","event":"ok","passed":1,"failed":0,"ignored":0,"measured":0,"filtered_out":0,"exec_time":0.012558923,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os-checker-plugin-cargo","kind":"bin"}}
-{"type":"suite","event":"started","test_count":2,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os_checker_plugin_cargo","kind":"lib"}}
-{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$from_lib"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::t1$from_t1","exec_time":0.005025676}
+{"type":"suite","event":"ok","passed":1,"failed":0,"ignored":0,"measured":0,"filtered_out":0,"exec_time":0.005025676,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"t1","kind":"test"}}
+{"type":"suite","event":"started","test_count":11,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os_checker_plugin_cargo","kind":"lib"}}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$crates_io::release_count::test_get_release_count"}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$crates_io::release_tarball::test_tarball_info"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$crates_io::release_count::test_get_release_count","exec_time":1.059978523}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$database::test_diagnostics_count"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$crates_io::release_tarball::test_tarball_info","exec_time":1.295281179}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$nextest::parse_stream"}
+{"type":"test","event":"failed","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$nextest::parse_stream","exec_time":0.005492276,"stdout":"[src/nextest/mod.rs:110:5] &reports = []\nthread 'nextest::parse_stream' panicked at src/nextest/mod.rs:111:5:\nassertion failed: !reports.is_empty()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n"}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$nextest::parse_test_event"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$nextest::parse_test_event","exec_time":0.004827423}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$nextest::run_and_parse"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$database::test_diagnostics_count","exec_time":1.016377764}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$nextest::string_to_name"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$nextest::string_to_name","exec_time":0.004807401}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::os_checker::test_sel4"}
+{"type":"test","event":"failed","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::os_checker::test_sel4","exec_time":0.041799556,"stdout":"Error: Error: \n   0: \u001b[91mseL4/rust-sel4 is not in config repos:\n      {\"os-checker/os-checker\"}\u001b[0m\n\nLocation:\n   \u001b[35msrc/config/mod.rs\u001b[0m:\u001b[35m209\u001b[0m\n\nBacktrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.\nRun with RUST_BACKTRACE=full to include source snippets.\n\n\nLocation:\n    src/repo/os_checker.rs:25:5\n"}
 {"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_cargo_tomls"}
-{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$from_lib","exec_time":0.011477933}
-{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_cargo_tomls","exec_time":0.503863582}
-{"type":"suite","event":"ok","passed":2,"failed":0,"ignored":0,"measured":0,"filtered_out":0,"exec_time":0.515341515,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os_checker_plugin_cargo","kind":"lib"}}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_cargo_tomls","exec_time":0.31056857}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_last_commit_time"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_last_commit_time","exec_time":0.031440264}
+{"type":"test","event":"started","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_pkg_targets"}
+{"type":"test","event":"failed","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$repo::test_pkg_targets","exec_time":0.009527343,"stdout":"Error: Error: \n   0: \u001b[91mseL4/rust-sel4 is not in config repos:\n      {\"os-checker/os-checker\"}\u001b[0m\n\nLocation:\n   \u001b[35msrc/config/mod.rs\u001b[0m:\u001b[35m209\u001b[0m\n\nBacktrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.\nRun with RUST_BACKTRACE=full to include source snippets.\n\n\nLocation:\n    src/repo/os_checker.rs:25:5\n"}
+{"type":"test","event":"ok","name":"os-checker-plugin-cargo::os_checker_plugin_cargo$nextest::run_and_parse","exec_time":26.509772712}
+{"type":"suite","event":"failed","passed":8,"failed":3,"ignored":0,"measured":0,"filtered_out":0,"exec_time":30.289873011,"nextest":{"crate":"os-checker-plugin-cargo","test_binary":"os_checker_plugin_cargo","kind":"lib"}}
