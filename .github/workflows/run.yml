@@ -58,7 +58,7 @@ jobs:
       #   run: cargo test -- test_pkg_targets --nocapture
 
       - name: Test get testcases
-        run: cargo test -- test_get_testcases --nocapture
+        run: cargo test -- test_get_testcases --include-ignored --nocapture
 
       # - name: Install plugin-cargo
       #   run: cargo install --path .
