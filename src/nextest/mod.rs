@@ -152,7 +152,7 @@ pub fn run_testcases(ws_dir: &Utf8Path) -> Result<Report> {
     // e.g. if a test result is ok, we won't get its started report
     let testcases = reports
         .into_iter()
-        .map(|report| (report.name, (report.event, report.exec_time)))
+        .map(|report| (report.name, (report.event, report.exec_time, report.stdout)))
         .collect();
 
     Ok(Report { stderr, testcases })
@@ -163,14 +163,21 @@ pub struct Report {
     /// FIXME: 尚未考虑 binary kind，也就是说，如果同名测试函数路径存在于 lib 和 bin，它们的数据不正确。
     /// 如果要知道 binary kind，需要解析 suite type 消息，并依赖于解析整个消息。
     /// 目前只读取 test type 消息，解析单个消息。
-    pub testcases: IndexMap<Name, (Event, Option<f32>)>,
+    pub testcases: IndexMap<Name, (Event, Option<f32>, Option<String>)>,
 }
 
 impl Report {
-    pub fn get_test_case(&self, pkg_bin_test: &[&str; 3]) -> (Option<Event>, Option<u32>) {
-        match self.testcases.get(pkg_bin_test).copied() {
-            Some((e, t)) => (Some(e), t.map(|f| (f * 1000.0).round() as u32)), // second => millisecond
-            None => (None, None),
+    pub fn get_test_case(
+        &self,
+        pkg_bin_test: &[&str; 3],
+    ) -> (Option<Event>, Option<u32>, Option<String>) {
+        match self.testcases.get(pkg_bin_test) {
+            Some((e, t, stdout)) => (
+                Some(*e),
+                t.map(|f| (f * 1000.0).round() as u32),
+                stdout.clone(),
+            ), // second => millisecond
+            None => (None, None, None),
         }
     }
 }
@@ -179,7 +186,10 @@ impl Report {
 #[test]
 fn run_and_parse() -> Result<()> {
     // Why doesn't this cause infinite test running?
-    let Report { stderr, testcases } = run_testcases(Utf8Path::new("."))?;
+    let Report {
+        stderr: _,
+        testcases,
+    } = run_testcases(Utf8Path::new("."))?;
 
     // println!("stderr={stderr}\ntestcases={testcases:?}");
     // dbg!(&testcases);

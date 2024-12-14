@@ -95,16 +95,18 @@ pub struct TestCase {
     name: String,
     status: Option<Event>,
     duration_ms: Option<u32>,
+    error: Option<String>,
 }
 
 impl TestCase {
     pub fn new(name: &str, pkg_name: &str, bin_name: &str, report: &Report) -> Self {
-        let (status, duration_ms) = report.get_test_case(&[pkg_name, bin_name, name]);
+        let (status, duration_ms, error) = report.get_test_case(&[pkg_name, bin_name, name]);
         let name = name.to_owned();
         Self {
             name,
             status,
             duration_ms,
+            error,
         }
     }
 }
