@@ -18,7 +18,9 @@ pub type PkgTests = IndexMap<String, TestCases>;
 pub fn get(workspace_root: &Utf8Path) -> Result<PkgTests> {
     let _span = error_span!("get_and_run", ?workspace_root).entered();
 
+    info!("test_list starts");
     let summary = test_list(workspace_root).with_context(|| "failed to get test list")?;
+    info!("run_testcases starts");
     let report = run_testcases(workspace_root).with_context(|| "failed to run tests")?;
 
     let workspace_tests_count = summary.test_count;
@@ -151,5 +153,6 @@ impl TestBinary {
 
 #[test]
 fn test_get_testcases() {
+    plugin::logger::init();
     dbg!(get(".".into()).unwrap());
 }
