@@ -1,7 +1,7 @@
 //! Ref: https://github.com/nextest-rs/nextest/blob/cb67e450e0fa2803f0089ffc9189c34ecd355f13/nextest-runner/src/reporter/structured/libtest.rs#L116
 use indexmap::Equivalent;
 use plugin::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::hash::Hash;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -12,6 +12,16 @@ pub struct ReportTest {
     name: Name,
     /// execution time in seconds; Some for Event::ok
     exec_time: Option<f32>,
+    /// running error: None means no error
+    #[serde(default, deserialize_with = "strip_color")]
+    stdout: Option<String>,
+}
+
+fn strip_color<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<String>::deserialize(deserializer)?.map(strip_ansi_escapes::strip_str))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -171,7 +181,8 @@ fn run_and_parse() -> Result<()> {
     // Why doesn't this cause infinite test running?
     let Report { stderr, testcases } = run_testcases(Utf8Path::new("."))?;
 
-    println!("stderr={stderr}\ntestcases={testcases:?}");
+    // println!("stderr={stderr}\ntestcases={testcases:?}");
+    // dbg!(&testcases);
 
     let got = testcases.get(&[
         "os-checker-plugin-cargo",
@@ -179,6 +190,15 @@ fn run_and_parse() -> Result<()> {
         "nextest::parse_stream",
     ]);
     assert!(got.is_some());
+    dbg!(got);
+
+    let got = testcases.get(&[
+        "os-checker-plugin-cargo",
+        "os_checker_plugin_cargo",
+        "repo::os_checker::test_sel4",
+    ]);
+    assert!(got.is_some());
+    dbg!(got);
 
     Ok(())
 }
