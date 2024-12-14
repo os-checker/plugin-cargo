@@ -13,8 +13,8 @@ env:
   DATABASE: debug
   BOT: 1
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  OS_CHECKER_CONFIGS: repos.json
-  # OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
+  # OS_CHECKER_CONFIGS: repos.json
+  OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
 
 jobs:
   run:
@@ -30,13 +30,13 @@ jobs:
 
       - name: Fetch os-checker config JSONs
         run: |
-          # gh release download -R kern-crates/.github -p os-checker_config.json
-          # # temporarily disable qclic/e1000e-frame
-          # jq 'del(."qclic/e1000e-frame")' os-checker_config.json > repos-default.json
-          # wget https://raw.githubusercontent.com/os-checker/os-checker/refs/heads/main/assets/repos-ui.json
-          # echo '{"os-checker/os-checker":{}}' > repos.json
+          gh release download -R kern-crates/.github -p os-checker_config.json
+          # temporarily disable qclic/e1000e-frame
+          jq 'del(."qclic/e1000e-frame")' os-checker_config.json > repos-default.json
+          wget https://raw.githubusercontent.com/os-checker/os-checker/refs/heads/main/assets/repos-ui.json
+          echo '{"os-checker/os-checker":{}}' > repos.json
 
-          echo '{"os-checker/os-checker-test-suite":{}}' > repos.json
+          # echo '{"os-checker/os-checker-test-suite":{}}' > repos.json
 
       - name: Install cargo-nextest
         run: |
