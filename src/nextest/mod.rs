@@ -184,6 +184,7 @@ impl Report {
 
 // NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1 cargo nextest run --message-format libtest-json-plus
 #[test]
+#[ignore = "manually trigger this to avoid recursion"]
 fn run_and_parse() -> Result<()> {
     // Why doesn't this cause infinite test running?
     let Report {

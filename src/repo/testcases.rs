@@ -152,7 +152,7 @@ impl TestBinary {
 }
 
 #[test]
-#[ignore = "manually trigger in case of recursion"]
+#[ignore = "manually trigger this to avoid recursion"]
 fn test_get_testcases() {
     plugin::logger::init();
     dbg!(get(".".into()).unwrap());
