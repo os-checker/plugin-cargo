@@ -72,7 +72,7 @@ impl Repo {
         for workspace_root in self.workspaces.keys() {
             // NOTE: nextest is run under all packages in a workspace,
             // maybe we should run tests for each package?
-            map.extend(testcases::get(&self.dir, workspace_root)?);
+            map.extend(testcases::get(workspace_root)?);
         }
         Ok(map)
     }

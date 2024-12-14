@@ -15,7 +15,7 @@ pub type PkgTests = IndexMap<String, TestCases>;
 // FIXME: how should we handle doc tests?
 
 // nextest reports all member tests even if it's run under a member, so we just run under workspace
-pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> {
+pub fn get(workspace_root: &Utf8Path) -> Result<PkgTests> {
     let _span = error_span!("get_and_run", ?workspace_root).entered();
 
     let summary = test_list(workspace_root).with_context(|| "failed to get test list")?;
@@ -34,7 +34,7 @@ pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> 
             continue;
         }
 
-        let test = TestBinary::new(ele, &report, repo_root);
+        let test = TestBinary::new(ele, &report);
         if let Some((_, _, tests)) = map.get_full_mut(&ele.package_name) {
             tests.tests.push(test);
         } else {
@@ -115,7 +115,7 @@ impl TestCase {
 }
 
 impl TestBinary {
-    pub fn new(ele: &RustTestSuiteSummary, report: &Report, _repo_root: &Utf8Path) -> Self {
+    pub fn new(ele: &RustTestSuiteSummary, report: &Report) -> Self {
         let binary = &ele.binary;
         let pkg_name = &*ele.package_name;
         let bin_name = &*binary.binary_name;
