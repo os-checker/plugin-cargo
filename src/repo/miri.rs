@@ -1,7 +1,7 @@
 use plugin::prelude::duct::cmd;
 
 pub fn cargo_miri(pkg: &str, kind: &str, bin: &str, name: &str) -> Option<String> {
-    let _span = error_span!("cargo miri test -p {pkg} --{kind} {bin} -- {name}").entered();
+    let _span = error_span!("miri", "cargo miri test -p {pkg} --{kind} {bin} -- {name}").entered();
 
     let kind = format!("--{kind}");
     info!("cargo miri test -p {pkg} {kind} {bin} -- {name}");
@@ -17,9 +17,9 @@ pub fn cargo_miri(pkg: &str, kind: &str, bin: &str, name: &str) -> Option<String
         .ok()?;
 
     if output.status.success() {
-        if !stderr.is_empty() {
-            error!(stderr);
-        }
+        // stderr may contain compilation information like
+        // stderr="    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s\n
+        // Running unittests src/lib.rs (target/miri/x86_64-unknown-linux-gnu/debug/deps/os_checker_plugin_cargo-457c2a400d4e8077)\n"
         return None;
     }
 
