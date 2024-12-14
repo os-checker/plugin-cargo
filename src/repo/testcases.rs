@@ -36,7 +36,7 @@ pub fn get(workspace_root: &Utf8Path) -> Result<PkgTests> {
             continue;
         }
 
-        let test = TestBinary::new(ele, &report);
+        let test = TestBinary::new(ele, &report, workspace_root);
         if let Some((_, _, tests)) = map.get_full_mut(&ele.package_name) {
             tests.tests.push(test);
         } else {
@@ -102,8 +102,15 @@ pub struct TestCase {
 }
 
 impl TestCase {
-    pub fn new(name: &str, pkg_name: &str, kind: &str, bin_name: &str, report: &Report) -> Self {
-        let miri = super::miri::cargo_miri(pkg_name, kind, bin_name, name);
+    pub fn new(
+        name: &str,
+        pkg_name: &str,
+        kind: &str,
+        bin_name: &str,
+        report: &Report,
+        workspace_root: &Utf8Path,
+    ) -> Self {
+        let miri = super::miri::cargo_miri(pkg_name, kind, bin_name, name, workspace_root);
         let (status, duration_ms, error) = report.get_test_case(&[pkg_name, bin_name, name]);
         let name = name.to_owned();
         Self {
@@ -117,7 +124,7 @@ impl TestCase {
 }
 
 impl TestBinary {
-    pub fn new(ele: &RustTestSuiteSummary, report: &Report) -> Self {
+    pub fn new(ele: &RustTestSuiteSummary, report: &Report, workspace_root: &Utf8Path) -> Self {
         let binary = &ele.binary;
         let pkg_name = &*ele.package_name;
         let bin_name = &*binary.binary_name;
@@ -125,7 +132,7 @@ impl TestBinary {
         let testcases: Vec<_> = ele
             .test_cases
             .keys()
-            .map(|name| TestCase::new(name, pkg_name, kind, bin_name, report))
+            .map(|name| TestCase::new(name, pkg_name, kind, bin_name, report, workspace_root))
             .collect();
         let (failed, duration_ms) = testcases.iter().fold((0, 0), |(s, d), t| {
             let d = d + t.duration_ms.unwrap_or(0) as usize;

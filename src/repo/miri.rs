@@ -1,11 +1,19 @@
+use os_checker_types::Utf8Path;
 use plugin::prelude::duct::cmd;
 
-pub fn cargo_miri(pkg: &str, kind: &str, bin: &str, name: &str) -> Option<String> {
+pub fn cargo_miri(
+    pkg: &str,
+    kind: &str,
+    bin: &str,
+    name: &str,
+    workspace_root: &Utf8Path,
+) -> Option<String> {
     let _span = error_span!("miri", "cargo miri test -p {pkg} --{kind} {bin} -- {name}").entered();
 
     let kind = format!("--{kind}");
     info!("cargo miri test -p {pkg} {kind} {bin} -- {name}");
     let output = cmd!("cargo", "miri", "test", "-p", pkg, kind, bin, "--", name)
+        .dir(workspace_root)
         .stderr_capture()
         .unchecked()
         .run()
@@ -28,6 +36,13 @@ pub fn cargo_miri(pkg: &str, kind: &str, bin: &str, name: &str) -> Option<String
 
 #[test]
 fn miri_output() {
-    let stderr = cargo_miri("os-checker-plugin-cargo", "test", "t1", "miri_should_err").unwrap();
+    let stderr = cargo_miri(
+        "os-checker-plugin-cargo",
+        "test",
+        "t1",
+        "miri_should_err",
+        ".".into(),
+    )
+    .unwrap();
     eprintln!("{stderr}");
 }
