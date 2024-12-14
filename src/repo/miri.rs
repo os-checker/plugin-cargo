@@ -4,7 +4,7 @@ pub fn cargo_miri(pkg: &str, kind: &str, bin: &str, name: &str) -> Option<String
     let _span = error_span!("cargo miri test -p {pkg} --{kind} {bin} -- {name}").entered();
 
     let kind = format!("--{kind}");
-    let output = cmd!("cargo", "miri", "test", "-p", pkg, kind, bin, "--", name)
+    let output = dbg!(cmd!("cargo", "miri", "test", "-p", pkg, kind, bin, "--", name))
         .stderr_capture()
         .unchecked()
         .run()

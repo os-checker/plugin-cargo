@@ -148,3 +148,8 @@ impl TestBinary {
         }
     }
 }
+
+#[test]
+fn test_get_testcases() {
+    dbg!(get(".".into()).unwrap());
+}
