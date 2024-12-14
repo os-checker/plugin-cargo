@@ -23,7 +23,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly-2024-12-03
           components: rustfmt, clippy, miri
 
       - name: Set up miri
