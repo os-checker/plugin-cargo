@@ -11,18 +11,20 @@ pub fn cargo_miri(
     bin: &str,
     name: &str,
     workspace_root: &Utf8Path,
-) -> Option<String> {
+) -> (Option<String>, bool) {
     let kind = format!("--{kind}");
     let cmd = format!("cargo miri test -p {pkg} {kind} {bin} -- {name}");
     let _span = error_span!("miri", cmd).entered();
 
-    let mut child = Command::new("cargo")
+    let Ok(mut child) = Command::new("cargo")
         .args(["miri", "test", "-p", pkg, &kind, bin, "--", name])
         .stderr(Stdio::piped())
         .current_dir(workspace_root)
         .spawn()
         .map_err(|err| error!("Failed to spawn miri command: {err}"))
-        .ok()?;
+    else {
+        return (None, false);
+    };
 
     let minutes = 2;
     let success = match child.wait_timeout(Duration::from_secs(minutes * 60)) {
@@ -31,12 +33,12 @@ pub fn cargo_miri(
         Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
             let err = format!("Process timed out for {minutes} minutes.");
             error!(err);
-            return Some(format!("cmd={cmd}\n{err}"));
+            return (Some(format!("cmd={cmd}\n{err}")), true);
         }
         Err(e) => {
             let err = format!("Failed to wait on process: {e:?}");
             error!(err);
-            return Some(format!("cmd={cmd}\n{err}"));
+            return (Some(format!("cmd={cmd}\n{err}")), false);
         }
     };
 
@@ -44,25 +46,25 @@ pub fn cargo_miri(
         // stderr may contain compilation information like
         // stderr="    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s\n
         // Running unittests src/lib.rs (target/miri/x86_64-unknown-linux-gnu/debug/deps/os_checker_plugin_cargo-457c2a400d4e8077)\n"
-        return None;
+        return (None, false);
     }
 
     let Some(mut stderr_child) = child.stderr else {
         error!("Child stderr is unavailable.");
-        return None;
+        return (None, false);
     };
 
     let mut stderr_buf = Vec::with_capacity(1024);
     if let Err(err) = stderr_child.read_to_end(&mut stderr_buf) {
         error!("Failed to read stderr: {err}");
-        return None;
+        return (None, false);
     };
 
     let stderr = String::from_utf8(strip_ansi_escapes::strip(stderr_buf))
         .map_err(|err| error!("{err}: Non-utf8 output is emitted."))
-        .ok()?;
+        .ok();
 
-    Some(stderr)
+    (stderr, false)
 }
 
 #[test]
@@ -74,6 +76,7 @@ fn miri_output() {
         "miri_should_err",
         ".".into(),
     )
+    .0
     .unwrap();
     eprintln!("{stderr}");
 }
