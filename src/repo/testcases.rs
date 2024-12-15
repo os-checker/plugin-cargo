@@ -98,7 +98,8 @@ pub struct TestCase {
     status: Option<Event>,
     duration_ms: Option<u32>,
     error: Option<String>,
-    miri: Option<String>,
+    miri_pass: bool,
+    miri_output: Option<String>,
     miri_timeout: bool,
 }
 
@@ -111,7 +112,7 @@ impl TestCase {
         report: &Report,
         workspace_root: &Utf8Path,
     ) -> Self {
-        let (miri, miri_timeout) =
+        let (miri_output, miri_pass, miri_timeout) =
             super::miri::cargo_miri(pkg_name, kind, bin_name, name, workspace_root);
         let (status, duration_ms, error) = report.get_test_case(&[pkg_name, bin_name, name]);
         let name = name.to_owned();
@@ -120,7 +121,8 @@ impl TestCase {
             status,
             duration_ms,
             error,
-            miri,
+            miri_pass,
+            miri_output,
             miri_timeout,
         }
     }
