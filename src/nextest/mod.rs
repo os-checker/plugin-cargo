@@ -1,7 +1,7 @@
 //! Ref: https://github.com/nextest-rs/nextest/blob/cb67e450e0fa2803f0089ffc9189c34ecd355f13/nextest-runner/src/reporter/structured/libtest.rs#L116
 use indexmap::Equivalent;
 use plugin::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::hash::Hash;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -12,6 +12,16 @@ pub struct ReportTest {
     name: Name,
     /// execution time in seconds; Some for Event::ok
     exec_time: Option<f32>,
+    /// running error: None means no error
+    #[serde(default, deserialize_with = "strip_color")]
+    stdout: Option<String>,
+}
+
+fn strip_color<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<String>::deserialize(deserializer)?.map(strip_ansi_escapes::strip_str))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -142,7 +152,7 @@ pub fn run_testcases(ws_dir: &Utf8Path) -> Result<Report> {
     // e.g. if a test result is ok, we won't get its started report
     let testcases = reports
         .into_iter()
-        .map(|report| (report.name, (report.event, report.exec_time)))
+        .map(|report| (report.name, (report.event, report.exec_time, report.stdout)))
         .collect();
 
     Ok(Report { stderr, testcases })
@@ -153,25 +163,37 @@ pub struct Report {
     /// FIXME: 尚未考虑 binary kind，也就是说，如果同名测试函数路径存在于 lib 和 bin，它们的数据不正确。
     /// 如果要知道 binary kind，需要解析 suite type 消息，并依赖于解析整个消息。
     /// 目前只读取 test type 消息，解析单个消息。
-    pub testcases: IndexMap<Name, (Event, Option<f32>)>,
+    pub testcases: IndexMap<Name, (Event, Option<f32>, Option<String>)>,
 }
 
 impl Report {
-    pub fn get_test_case(&self, pkg_bin_test: &[&str; 3]) -> (Option<Event>, Option<u32>) {
-        match self.testcases.get(pkg_bin_test).copied() {
-            Some((e, t)) => (Some(e), t.map(|f| (f * 1000.0).round() as u32)), // second => millisecond
-            None => (None, None),
+    pub fn get_test_case(
+        &self,
+        pkg_bin_test: &[&str; 3],
+    ) -> (Option<Event>, Option<u32>, Option<String>) {
+        match self.testcases.get(pkg_bin_test) {
+            Some((e, t, stdout)) => (
+                Some(*e),
+                t.map(|f| (f * 1000.0).round() as u32),
+                stdout.clone(),
+            ), // second => millisecond
+            None => (None, None, None),
         }
     }
 }
 
 // NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1 cargo nextest run --message-format libtest-json-plus
 #[test]
+#[ignore = "manually trigger this to avoid recursion"]
 fn run_and_parse() -> Result<()> {
     // Why doesn't this cause infinite test running?
-    let Report { stderr, testcases } = run_testcases(Utf8Path::new("."))?;
+    let Report {
+        stderr: _,
+        testcases,
+    } = run_testcases(Utf8Path::new("."))?;
 
-    println!("stderr={stderr}\ntestcases={testcases:?}");
+    // println!("stderr={stderr}\ntestcases={testcases:?}");
+    // dbg!(&testcases);
 
     let got = testcases.get(&[
         "os-checker-plugin-cargo",
@@ -179,6 +201,15 @@ fn run_and_parse() -> Result<()> {
         "nextest::parse_stream",
     ]);
     assert!(got.is_some());
+    dbg!(got);
+
+    let got = testcases.get(&[
+        "os-checker-plugin-cargo",
+        "os_checker_plugin_cargo",
+        "repo::os_checker::test_sel4",
+    ]);
+    assert!(got.is_some());
+    dbg!(got);
 
     Ok(())
 }

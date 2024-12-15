@@ -48,13 +48,13 @@ fn url(pkg: &str, version: &Version) -> String {
 
 fn get_last_release_info(pkg: &str, version: &Version) -> Result<TarballInfo> {
     let tarball = download_tarball(pkg, version)?;
-    Ok(TarballInfo::new(&tarball)?)
+    TarballInfo::new(&tarball)
 }
 
 impl IndexFile {
     pub fn get_last_release_info(&mut self) -> Result<()> {
         let last = self.data.last();
-        let last = last.with_context(|| format!(" index file is empty"))?;
+        let last = last.with_context(|| "index file is empty")?;
         self.tarball = Some(get_last_release_info(&self.pkg, &last.vers)?);
         Ok(())
     }

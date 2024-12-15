@@ -15,10 +15,12 @@ pub type PkgTests = IndexMap<String, TestCases>;
 // FIXME: how should we handle doc tests?
 
 // nextest reports all member tests even if it's run under a member, so we just run under workspace
-pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> {
+pub fn get(workspace_root: &Utf8Path) -> Result<PkgTests> {
     let _span = error_span!("get_and_run", ?workspace_root).entered();
 
+    info!("test_list starts");
     let summary = test_list(workspace_root).with_context(|| "failed to get test list")?;
+    info!("run_testcases starts");
     let report = run_testcases(workspace_root).with_context(|| "failed to run tests")?;
 
     let workspace_tests_count = summary.test_count;
@@ -34,7 +36,7 @@ pub fn get(repo_root: &Utf8Path, workspace_root: &Utf8Path) -> Result<PkgTests> 
             continue;
         }
 
-        let test = TestBinary::new(ele, &report, repo_root);
+        let test = TestBinary::new(ele, &report, workspace_root);
         if let Some((_, _, tests)) = map.get_full_mut(&ele.package_name) {
             tests.tests.push(test);
         } else {
@@ -95,29 +97,47 @@ pub struct TestCase {
     name: String,
     status: Option<Event>,
     duration_ms: Option<u32>,
+    error: Option<String>,
+    miri_pass: bool,
+    miri_output: Option<String>,
+    miri_timeout: bool,
 }
 
 impl TestCase {
-    pub fn new(name: &str, pkg_name: &str, bin_name: &str, report: &Report) -> Self {
-        let (status, duration_ms) = report.get_test_case(&[pkg_name, bin_name, name]);
+    pub fn new(
+        name: &str,
+        pkg_name: &str,
+        kind: &str,
+        bin_name: &str,
+        report: &Report,
+        workspace_root: &Utf8Path,
+    ) -> Self {
+        let (miri_output, miri_pass, miri_timeout) =
+            super::miri::cargo_miri(pkg_name, kind, bin_name, name, workspace_root);
+        let (status, duration_ms, error) = report.get_test_case(&[pkg_name, bin_name, name]);
         let name = name.to_owned();
         Self {
             name,
             status,
             duration_ms,
+            error,
+            miri_pass,
+            miri_output,
+            miri_timeout,
         }
     }
 }
 
 impl TestBinary {
-    pub fn new(ele: &RustTestSuiteSummary, report: &Report, _repo_root: &Utf8Path) -> Self {
+    pub fn new(ele: &RustTestSuiteSummary, report: &Report, workspace_root: &Utf8Path) -> Self {
         let binary = &ele.binary;
         let pkg_name = &*ele.package_name;
         let bin_name = &*binary.binary_name;
+        let kind = &*binary.kind.0;
         let testcases: Vec<_> = ele
             .test_cases
             .keys()
-            .map(|name| TestCase::new(name, pkg_name, bin_name, report))
+            .map(|name| TestCase::new(name, pkg_name, kind, bin_name, report, workspace_root))
             .collect();
         let (failed, duration_ms) = testcases.iter().fold((0, 0), |(s, d), t| {
             let d = d + t.duration_ms.unwrap_or(0) as usize;
@@ -141,4 +161,11 @@ impl TestBinary {
             duration_ms,
         }
     }
+}
+
+#[test]
+#[ignore = "manually trigger this to avoid recursion"]
+fn test_get_testcases() {
+    plugin::logger::init();
+    dbg!(get(".".into()).unwrap());
 }

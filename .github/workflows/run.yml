@@ -23,7 +23,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
         with:
-          components: rustfmt, clippy
+          components: rustfmt, clippy, miri
+
+      - name: Set up miri
+        run: cargo miri setup
 
       - name: Fetch os-checker config JSONs
         run: |
@@ -32,6 +35,8 @@ jobs:
           jq 'del(."qclic/e1000e-frame")' os-checker_config.json > repos-default.json
           wget https://raw.githubusercontent.com/os-checker/os-checker/refs/heads/main/assets/repos-ui.json
           echo '{"os-checker/os-checker":{}}' > repos.json
+
+          # echo '{"os-checker/os-checker-test-suite":{}}' > repos.json
 
       - name: Install cargo-nextest
         run: |
@@ -53,6 +58,9 @@ jobs:
       #
       # - name: Test pkg_targets
       #   run: cargo test -- test_pkg_targets --nocapture
+      #
+      # - name: Test get testcases
+      #   run: cargo test -- test_get_testcases --include-ignored --nocapture
 
       - name: Install plugin-cargo
         run: cargo install --path .

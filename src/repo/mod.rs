@@ -6,6 +6,7 @@ use plugin::{prelude::*, write_json};
 use std::sync::LazyLock;
 use testcases::PkgTests;
 
+mod miri;
 mod os_checker;
 mod output;
 mod testcases;
@@ -62,7 +63,14 @@ impl Repo {
             .values()
             .flat_map(|ws| ws.workspace_packages())
             // but don't emit packages that are not checked by os-checker
-            .filter(|pkg| self.pkg_targets.contains_key(pkg.name.as_str()))
+            // FIXME: since --target is not supported in nextest and miri yet,
+            // we only run tests for x86_64-unknown-linux-gnu.
+            .filter(|pkg| {
+                self.pkg_targets
+                    .get(pkg.name.as_str())
+                    .map(|v| v.iter().any(|s| s == "x86_64-unknown-linux-gnu"))
+                    .unwrap_or(false)
+            })
             .collect()
     }
 
@@ -71,7 +79,7 @@ impl Repo {
         for workspace_root in self.workspaces.keys() {
             // NOTE: nextest is run under all packages in a workspace,
             // maybe we should run tests for each package?
-            map.extend(testcases::get(&self.dir, workspace_root)?);
+            map.extend(testcases::get(workspace_root)?);
         }
         Ok(map)
     }
