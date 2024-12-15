@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
   RUST_LOG: info
   # database branch
-  DATABASE: debug
+  DATABASE: main
   BOT: 1
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   # OS_CHECKER_CONFIGS: repos.json
