@@ -12,17 +12,10 @@ pub fn cargo_miri(
     name: &str,
     workspace_root: &Utf8Path,
 ) -> Option<String> {
-    let _span = error_span!("miri", "cargo miri test -p {pkg} --{kind} {bin} -- {name}").entered();
-
     let kind = format!("--{kind}");
-    info!("cargo miri test -p {pkg} {kind} {bin} -- {name}");
-    // let output = cmd!("cargo", "miri", "test", "-p", pkg, kind, bin, "--", name)
-    //     .dir(workspace_root)
-    //     .stderr_capture()
-    //     .unchecked()
-    //     .run()
-    //     .map_err(|err| error!(?err))
-    //     .ok()?;
+    let cmd = format!("cargo miri test -p {pkg} {kind} {bin} -- {name}");
+    let _span = error_span!("miri", cmd).entered();
+
     let mut child = Command::new("cargo")
         .args(["miri", "test", "-p", pkg, &kind, bin, "--", name])
         .stderr(Stdio::piped())
@@ -31,16 +24,19 @@ pub fn cargo_miri(
         .map_err(|err| error!("Failed to spawn miri command: {err}"))
         .ok()?;
 
-    let success = match child.wait_timeout(Duration::from_secs(2 * 60)) {
+    let minutes = 2;
+    let success = match child.wait_timeout(Duration::from_secs(minutes * 60)) {
         // Finished in 2 minutes
         Ok(status) => status.success(),
         Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
-            error!("Process timed out");
-            return None;
+            let err = format!("Process timed out for {minutes} minutes.");
+            error!(err);
+            return Some(format!("cmd={cmd}\n{err}"));
         }
         Err(e) => {
-            error!("Failed to wait on process: {:?}", e);
-            return None;
+            let err = format!("Failed to wait on process: {e:?}");
+            error!(err);
+            return Some(format!("cmd={cmd}\n{err}"));
         }
     };
 
