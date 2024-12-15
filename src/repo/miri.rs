@@ -26,7 +26,7 @@ pub fn cargo_miri(
         return (None, false, false);
     };
 
-    let minutes = 2;
+    let minutes = 1;
     let success = match child.wait_timeout(Duration::from_secs(minutes * 60)) {
         // Finished in 2 minutes
         Ok(status) => status.success(),
