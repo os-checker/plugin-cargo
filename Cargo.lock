@@ -123,6 +123,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 
 [[package]]
+name = "child_wait_timeout"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ebf6d2ce6ff24bd43f6896fff032a712a78866e5d59854fbd48fa08ad95b0080"
+dependencies = [
+ "cc",
+ "libc",
+ "winapi",
+]
+
+[[package]]
 name = "color-eyre"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -444,6 +455,7 @@ dependencies = [
 name = "os-checker-plugin-cargo"
 version = "0.1.2"
 dependencies = [
+ "child_wait_timeout",
  "eyre",
  "nextest-metadata",
  "os-checker-plugin",
