@@ -453,7 +453,7 @@ dependencies = [
 
 [[package]]
 name = "os-checker-plugin-cargo"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "child_wait_timeout",
  "eyre",
