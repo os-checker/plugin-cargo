@@ -28,6 +28,7 @@ pub fn run(user_repo: &str) -> Result<PkgTargets> {
         std::str::from_utf8(&output.stderr)?
     );
 
+    println!("output=\n{}", std::str::from_utf8(&output.stdout).unwrap());
     let v: Vec<ListTargets> = serde_json::from_reader(output.stdout.as_slice())?;
     Ok(list_to_map(v))
 }
