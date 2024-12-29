@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 0 * * *'
   push:
-    branches: [ main, feat/* ]
+    branches: [ main, feat/*, fix/* ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -34,9 +34,8 @@ jobs:
           # temporarily disable qclic/e1000e-frame
           jq 'del(."qclic/e1000e-frame")' os-checker_config.json > repos-default.json
           wget https://raw.githubusercontent.com/os-checker/os-checker/refs/heads/main/assets/repos-ui.json
-          echo '{"os-checker/os-checker":{}}' > repos.json
 
-          # echo '{"os-checker/os-checker-test-suite":{}}' > repos.json
+          # echo '{"os-checker/os-checker":{}}' > repos.json
 
       - name: Install cargo-nextest
         run: |

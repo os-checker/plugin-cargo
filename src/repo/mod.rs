@@ -63,23 +63,34 @@ impl Repo {
             .values()
             .flat_map(|ws| ws.workspace_packages())
             // but don't emit packages that are not checked by os-checker
-            // FIXME: since --target is not supported in nextest and miri yet,
-            // we only run tests for x86_64-unknown-linux-gnu.
-            .filter(|pkg| {
-                self.pkg_targets
-                    .get(pkg.name.as_str())
-                    .map(|v| v.iter().any(|s| s == "x86_64-unknown-linux-gnu"))
-                    .unwrap_or(false)
-            })
+            .filter(|pkg| self.pkg_targets.get(pkg.name.as_str()).is_some())
             .collect()
+    }
+
+    fn contains_x64(&self, pkg: &str) -> bool {
+        if let Some(targets) = self.pkg_targets.get(pkg) {
+            for target in targets {
+                if target == "x86_64-unknown-linux-gnu" {
+                    return true;
+                }
+            }
+        }
+        false
     }
 
     fn get_pkg_tests(&self) -> Result<PkgTests> {
         let mut map = PkgTests::new();
-        for workspace_root in self.workspaces.keys() {
+        for (workspace_root, meta) in &self.workspaces {
             // NOTE: nextest is run under all packages in a workspace,
             // maybe we should run tests for each package?
-            map.extend(testcases::get(workspace_root)?);
+            // FIXME: since --target is not supported in nextest and miri yet,
+            // we should tell them not run tests other than on x86_64-unknown-linux-gnu.
+            'inner: for pkg in meta.workspace_packages() {
+                if self.contains_x64(&pkg.name) {
+                    map.extend(testcases::get(workspace_root)?);
+                    break 'inner;
+                }
+            }
         }
         Ok(map)
     }

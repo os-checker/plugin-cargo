@@ -5,6 +5,7 @@ use plugin::prelude::*;
 pub type PkgTargets = IndexMap<XString, Vec<String>>;
 
 pub fn run(user_repo: &str) -> Result<PkgTargets> {
+    const OUT: &str = "layout.json";
     let dir = local_base_dir();
 
     // OS_CHECKER_CONFIGS is inherented
@@ -15,9 +16,10 @@ pub fn run(user_repo: &str) -> Result<PkgTargets> {
         dir,
         "--list-targets",
         user_repo,
+        "--out",
+        OUT
     )
     .env_remove("RUST_LOG")
-    .stdout_capture()
     .stderr_capture()
     .unchecked()
     .run()?;
@@ -28,7 +30,9 @@ pub fn run(user_repo: &str) -> Result<PkgTargets> {
         std::str::from_utf8(&output.stderr)?
     );
 
-    let v: Vec<ListTargets> = serde_json::from_reader(output.stdout.as_slice())?;
+    let targets = std::fs::read_to_string(OUT)
+        .with_context(|| format!("Layout output file {OUT} doesn't exist."))?;
+    let v: Vec<ListTargets> = serde_json::from_str(&targets)?;
     Ok(list_to_map(v))
 }
 
