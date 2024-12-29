@@ -32,7 +32,6 @@ pub fn run(user_repo: &str) -> Result<PkgTargets> {
 
     let targets = std::fs::read_to_string(OUT)
         .with_context(|| format!("Layout output file {OUT} doesn't exist."))?;
-    println!("targets=\n{targets}");
     let v: Vec<ListTargets> = serde_json::from_str(&targets)?;
     Ok(list_to_map(v))
 }
