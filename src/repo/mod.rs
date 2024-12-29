@@ -63,14 +63,7 @@ impl Repo {
             .values()
             .flat_map(|ws| ws.workspace_packages())
             // but don't emit packages that are not checked by os-checker
-            // FIXME: since --target is not supported in nextest and miri yet,
-            // we only run tests for x86_64-unknown-linux-gnu.
-            .filter(|pkg| {
-                self.pkg_targets
-                    .get(pkg.name.as_str())
-                    .map(|v| v.iter().any(|s| s == "x86_64-unknown-linux-gnu"))
-                    .unwrap_or(false)
-            })
+            .filter(|pkg| self.pkg_targets.get(pkg.name.as_str()).is_some())
             .collect()
     }
 
@@ -79,6 +72,8 @@ impl Repo {
         for workspace_root in self.workspaces.keys() {
             // NOTE: nextest is run under all packages in a workspace,
             // maybe we should run tests for each package?
+            // FIXME: since --target is not supported in nextest and miri yet,
+            // we should tell don't them not run tests other than on x86_64-unknown-linux-gnu.
             map.extend(testcases::get(workspace_root)?);
         }
         Ok(map)
