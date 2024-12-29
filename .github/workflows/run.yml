@@ -4,17 +4,17 @@ on:
   schedule:
     - cron: '0 0 * * *'
   push:
-    branches: [ main, feat/* ]
+    branches: [ main, feat/*, fix/* ]
 
 env:
   CARGO_TERM_COLOR: always
   RUST_LOG: info
   # database branch
-  DATABASE: main
+  DATABASE: debug
   BOT: 1
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  # OS_CHECKER_CONFIGS: repos.json
-  OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
+  OS_CHECKER_CONFIGS: repos.json
+  # OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
 
 jobs:
   run:
