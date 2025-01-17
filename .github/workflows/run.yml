@@ -45,6 +45,8 @@ jobs:
 
       - name: Install os-checker
         run: |
+          gh release download --clobber -R os-checker/database precompiled-checkers -p checkers.tar.x
+          tar -xvJf checkers.tar.xz -C ~/.cargo/bin/
           wget https://github.com/os-checker/database/releases/download/precompiled-checkers/os-checker -O ~/.cargo/bin/os-checker
           chmod +x ~/.cargo/bin/os-checker
           os-checker config --list-repos
