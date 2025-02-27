@@ -1,7 +1,7 @@
 use plugin::prelude::{cmd, duct, Result, Timestamp, Utf8Path};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GitInfo {
     pub last_commit: Timestamp,
     pub sha: String,

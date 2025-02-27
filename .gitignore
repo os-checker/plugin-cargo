@@ -1,2 +1,5 @@
 /target
 /tmp
+cache-plugin-cargo-v*.redb
+layout.json
+/cargo

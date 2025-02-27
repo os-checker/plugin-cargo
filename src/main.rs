@@ -4,6 +4,8 @@ use plugin::{logger, prelude::*, repos, write_json};
 #[macro_use]
 extern crate tracing;
 
+mod cache;
+
 fn main() -> Result<()> {
     logger::init();
 

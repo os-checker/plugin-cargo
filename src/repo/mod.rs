@@ -1,13 +1,14 @@
 use crate::{crates_io::IndexFile, database::diag_total_count};
 use cargo_metadata::Package;
 use eyre::ContextCompat;
-use git_info::GitInfo;
 use output::Output;
 use plugin::{prelude::*, write_json};
 use std::sync::LazyLock;
 use testcases::PkgTests;
 
 mod git_info;
+pub use git_info::GitInfo;
+
 mod miri;
 mod os_checker;
 mod output;
@@ -158,10 +159,6 @@ impl Repo {
         std::fs::remove_dir_all(&self.dir)?;
         Ok(())
     }
-
-    // pub fn git_info(&self) ->  {
-    //
-    // }
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {
