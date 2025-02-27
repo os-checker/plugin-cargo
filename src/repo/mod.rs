@@ -1,11 +1,13 @@
 use crate::{crates_io::IndexFile, database::diag_total_count};
 use cargo_metadata::Package;
 use eyre::ContextCompat;
+use git_info::GitInfo;
 use output::Output;
 use plugin::{prelude::*, write_json};
 use std::sync::LazyLock;
 use testcases::PkgTests;
 
+mod git_info;
 mod miri;
 mod os_checker;
 mod output;
@@ -20,7 +22,7 @@ pub struct Repo {
     pub pkg_targets: os_checker::PkgTargets,
     pub cargo_tomls: Vec<Utf8PathBuf>,
     pub workspaces: Workspaces,
-    pub last_commit_time: Timestamp,
+    pub git_info: GitInfo,
 }
 
 impl Repo {
@@ -44,7 +46,7 @@ impl Repo {
 
         let workspaces = workspaces(&cargo_tomls)?;
 
-        let last_commit_time = last_commit_time(&dir)?;
+        let git_info = GitInfo::new(&dir)?;
 
         Ok(Repo {
             user,
@@ -53,7 +55,7 @@ impl Repo {
             pkg_targets,
             cargo_tomls,
             workspaces,
-            last_commit_time,
+            git_info,
         })
     }
 
@@ -102,7 +104,7 @@ impl Repo {
             .unwrap_or_default();
         let pkgs = self.packages();
 
-        let last_commit_time = self.last_commit_time.to_string();
+        let last_commit_time = self.git_info.last_commit.to_string();
 
         let mut outputs = IndexMap::with_capacity(pkgs.len());
         for pkg in pkgs {
@@ -156,13 +158,10 @@ impl Repo {
         std::fs::remove_dir_all(&self.dir)?;
         Ok(())
     }
-}
 
-fn last_commit_time(root: &Utf8Path) -> Result<Timestamp> {
-    let cmd = duct::cmd!("git", "log", "-1", "--pretty=format:%ct");
-    // git log -1 --format="%ct"
-    let unix_timestamp = cmd.dir(root).read()?.trim().parse()?;
-    Ok(Timestamp::from_second(unix_timestamp)?)
+    // pub fn git_info(&self) ->  {
+    //
+    // }
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {
@@ -232,9 +231,4 @@ fn test_pkg_targets() -> Result<()> {
     dbg!(&repo.pkg_targets);
     repo.remove_local_dir()?;
     Ok(())
-}
-
-#[test]
-fn test_last_commit_time() {
-    dbg!(last_commit_time(".".into()).unwrap());
 }
