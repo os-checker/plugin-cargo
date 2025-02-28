@@ -152,21 +152,20 @@ impl Repo {
             },
             "pkgs": outputs
         });
-        self.write_json(&json)?;
 
         Ok(json)
-    }
-
-    fn write_json(&self, json: &serde_json::Value) -> Result<()> {
-        let mut path = Utf8PathBuf::from_iter([crate::BASE_DIR, &self.user, &self.repo]);
-        path.set_extension("json");
-        write_json(&path, json)
     }
 
     pub fn remove_local_dir(self) -> Result<()> {
         std::fs::remove_dir_all(&self.dir)?;
         Ok(())
     }
+}
+
+pub fn write_output_json(user: &str, repo: &str, json: &serde_json::Value) -> Result<()> {
+    let mut path = Utf8PathBuf::from_iter([crate::BASE_DIR, user, repo]);
+    path.set_extension("json");
+    write_json(&path, json)
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {

@@ -1,4 +1,4 @@
-use os_checker_plugin_cargo::BASE_DIR;
+use os_checker_plugin_cargo::{repo::write_output_json, BASE_DIR};
 use plugin::{logger, prelude::*, repos, write_json};
 
 #[macro_use]
@@ -15,7 +15,11 @@ fn main() -> Result<()> {
     for user_repo in &list {
         let _span = error_span!("list", user_repo).entered();
         match cache::get_or_gen_cache(user_repo) {
-            Ok((_, val)) => outputs.push(val.into_json()),
+            Ok((key, val)) => {
+                let json = val.into_json();
+                write_output_json(&key.user, &key.repo, &json)?;
+                outputs.push(json);
+            }
             Err(err) => error!(?err),
         };
     }
