@@ -1,5 +1,5 @@
 use super::{CachedKey, CachedValue, Result};
-use redb::{Database, TableDefinition, TableHandle};
+use redb::{Database, ReadableTableMetadata, TableDefinition, TableHandle};
 
 const FILE: &str = "cache-plugin-cargo-v0.1.4.redb";
 const TABLE: TableDefinition<CachedKey, CachedValue> = TableDefinition::new("plugin-cargo");
@@ -21,7 +21,8 @@ impl Db {
         {
             let read_txn = db.begin_read()?;
             info!(
-                "list tables = {:?}",
+                "len = {:?} list tables = {:?}",
+                read_txn.open_table(TABLE)?.len(),
                 read_txn
                     .list_tables()?
                     .map(|t| t.name().to_owned())
@@ -82,7 +83,6 @@ fn test_os_checker_test_suite() -> Result<()> {
 
 #[test]
 fn test_db_list_table() -> Result<()> {
-    use redb::ReadableTableMetadata;
     let db = Database::create(FILE)?;
 
     let read_txn = db.begin_read()?;
