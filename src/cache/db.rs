@@ -4,11 +4,33 @@ use redb::{Database, TableDefinition};
 const FILE: &str = "cache-plugin-cargo-v0.1.4.redb";
 const TABLE: TableDefinition<CachedKey, CachedValue> = TableDefinition::new("plugin-cargo");
 
-pub fn read_cache(key: &CachedKey) -> Result<Option<CachedValue>> {
-    let db = Database::create(FILE)?;
-    let read_txn = db.begin_read()?;
-    let table = read_txn.open_table(TABLE)?;
-    Ok(table.get(key)?.map(|val| val.value()))
+pub struct Db {
+    db: Database,
+}
+
+impl Db {
+    pub fn open() -> Result<Self> {
+        Ok(Db {
+            db: Database::create(FILE)?,
+        })
+    }
+
+    pub fn load_cache(&self, key: &CachedKey) -> Result<Option<CachedValue>> {
+        let read_txn = self.db.begin_read()?;
+        let table = read_txn.open_table(TABLE)?;
+        Ok(table.get(key)?.map(|val| val.value()))
+    }
+
+    // TODO: add a timestamp for each store
+    pub fn store_cache(&self, key: &CachedKey, val: &CachedValue) -> Result<()> {
+        let write_txn = self.db.begin_write()?;
+        {
+            let mut table = write_txn.open_table(TABLE)?;
+            table.insert(key, val)?;
+        }
+        write_txn.commit()?;
+        Ok(())
+    }
 }
 
 #[test]
