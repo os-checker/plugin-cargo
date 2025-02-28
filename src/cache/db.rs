@@ -1,5 +1,5 @@
 use super::{CachedKey, CachedValue, Result};
-use redb::{Database, TableDefinition};
+use redb::{Database, TableDefinition, TableHandle};
 
 const FILE: &str = "cache-plugin-cargo-v0.1.4.redb";
 const TABLE: TableDefinition<CachedKey, CachedValue> = TableDefinition::new("plugin-cargo");
@@ -18,8 +18,12 @@ impl Db {
             db.begin_write()?.open_table(TABLE)
         );
         info!(
-            "[begin_read] open_table: {:?}",
-            db.begin_read()?.open_table(TABLE)
+            "[begin_read] open_table: {:?} list tables = {:?}",
+            db.begin_read()?.open_table(TABLE),
+            db.begin_read()?
+                .list_tables()?
+                .map(|t| t.name().to_owned())
+                .collect::<Vec<_>>(),
         );
 
         Ok(Db { db })
