@@ -15,17 +15,13 @@ impl Db {
         // create table if not present
         {
             let write_txn = db.begin_write()?;
-            info!(
-                "[begin_write] open_table: {:?}",
-                write_txn.open_table(TABLE)
-            );
+            write_txn.open_table(TABLE)?;
             write_txn.commit()?;
         }
         {
             let read_txn = db.begin_read()?;
             info!(
-                "[begin_read] open_table: {:?} list tables = {:?}",
-                read_txn.open_table(TABLE),
+                "list tables = {:?}",
                 read_txn
                     .list_tables()?
                     .map(|t| t.name().to_owned())
