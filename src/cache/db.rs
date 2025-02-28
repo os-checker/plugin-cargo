@@ -13,10 +13,14 @@ impl Db {
         let db = Database::create(FILE)?;
 
         // create table if not present
-        info!(
-            "[begin_write] open_table: {:?}",
-            db.begin_write()?.open_table(TABLE)
-        );
+        {
+            let write_txn = db.begin_write()?;
+            info!(
+                "[begin_write] open_table: {:?}",
+                write_txn.open_table(TABLE)
+            );
+            write_txn.commit()?;
+        }
         info!(
             "[begin_read] open_table: {:?} list tables = {:?}",
             db.begin_read()?.open_table(TABLE),
