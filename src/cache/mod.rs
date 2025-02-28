@@ -1,6 +1,6 @@
 use crate::Result;
-use os_checker_plugin_cargo::repo::{GitInfo, Repo};
-use plugin::prelude::serde_json;
+use os_checker_plugin_cargo::repo::{split_user_repo, GitInfo, Repo};
+use plugin::prelude::{cmd, serde_json};
 use redb::{Database, Error, ReadableTable, TableDefinition};
 use serde::{Deserialize, Serialize};
 
@@ -103,7 +103,7 @@ impl redb::Value for CachedValue {
 }
 
 /// Generate a new cached repo and its output regarding tests and package information.
-pub fn cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
+pub fn gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     let repo = Repo::new(user_repo)?;
     let output = repo.output()?;
     std::fs::remove_dir_all(&repo.dir)?;
@@ -117,11 +117,59 @@ pub fn cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     ))
 }
 
+#[derive(Debug, Deserialize)]
+struct Api {
+    branch: String,
+    sha: String,
+}
+
+fn github_graphql_api(user_repo: &str) -> Result<Api> {
+    // gh api graphql -f query='
+    //   query($owner: String!, $name: String!) {
+    //     repository(owner: $owner, name: $name) {
+    //       defaultBranchRef {
+    //         name
+    //         target {
+    //           ... on Commit {
+    //             oid
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // ' -F owner="os-checker" -F name="os-checker-test-suite" |
+    //   jq ".data.repository.defaultBranchRef | {branch: .name, sha: .target.oid}"
+    const QUERY: &str = "query=
+query($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    defaultBranchRef {
+      name
+      target {
+        ... on Commit {
+          oid
+        }
+      }
+    }
+  }
+}";
+
+    let [user, repo] = split_user_repo(user_repo)?;
+    let owner = format!("owner={user}");
+    let name = format!("name={repo}");
+    let expr = cmd!("gh", "api", "graphql", "-f", QUERY, "-F", owner, "-F", name).pipe(cmd!(
+        "jq",
+        ".data.repository.defaultBranchRef | {branch: .name, sha: .target.oid}"
+    ));
+    let json = expr.read()?;
+    let api: Api = serde_json::from_str(&json)?;
+    Ok(api)
+}
+
 #[test]
-fn test_os_checker_test_suite() -> crate::Result<()> {
+fn test_os_checker_test_suite() -> Result<()> {
     const FILE: &str = "cache-plugin-cargo-v-test.redb";
 
-    let (key, val) = cache("os-checker/os-checker-test-suite")?;
+    let (key, val) = gen_cache("os-checker/os-checker-test-suite")?;
 
     let db = Database::create(FILE)?;
 
@@ -136,5 +184,11 @@ fn test_os_checker_test_suite() -> crate::Result<()> {
     let table = read_txn.open_table(TABLE)?;
     assert_eq!(val.json(), table.get(&key)?.unwrap().value().json());
 
+    Ok(())
+}
+
+#[test]
+fn test_github_graphql_api() -> Result<()> {
+    dbg!(github_graphql_api("os-checker/os-checker-test-suite")?);
     Ok(())
 }

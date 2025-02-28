@@ -14,6 +14,17 @@ mod os_checker;
 mod output;
 mod testcases;
 
+pub fn split_user_repo(user_repo: &str) -> Result<[&str; 2]> {
+    let mut split = user_repo.split("/");
+    let user = split
+        .next()
+        .with_context(|| format!("Not found user in `{user_repo}`."))?;
+    let repo = split
+        .next()
+        .with_context(|| format!("Not found repo in `{user_repo}`."))?;
+    Ok([user, repo])
+}
+
 #[derive(Debug)]
 pub struct Repo {
     pub user: String,
@@ -28,20 +39,12 @@ pub struct Repo {
 
 impl Repo {
     pub fn new(user_repo: &str) -> Result<Repo> {
-        let mut split = user_repo.split("/");
-        let user = split
-            .next()
-            .with_context(|| format!("Not found user in `{user_repo}`."))?
-            .to_owned();
-        let repo = split
-            .next()
-            .with_context(|| format!("Not found repo in `{user_repo}`."))?
-            .to_owned();
+        let [user, repo] = split_user_repo(user_repo)?;
 
         // this implies repo downloading
         let pkg_targets = os_checker::run(user_repo)?;
 
-        let dir = local_repo_dir(&user, &repo);
+        let dir = local_repo_dir(user, repo);
         let mut cargo_tomls = get_cargo_tomls_recursively(&dir);
         cargo_tomls.sort_unstable();
 
@@ -50,8 +53,8 @@ impl Repo {
         let git_info = GitInfo::new(&dir)?;
 
         Ok(Repo {
-            user,
-            repo,
+            user: user.to_owned(),
+            repo: repo.to_owned(),
             dir,
             pkg_targets,
             cargo_tomls,
