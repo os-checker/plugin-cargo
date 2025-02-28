@@ -10,12 +10,12 @@ env:
   CARGO_TERM_COLOR: always
   RUST_LOG: info
   # database branch
-  DATABASE: main
+  DATABASE: debug
   TAG_CACHE: cache-plugin-cargo-v0.1.4.redb
   BOT: 1
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  # OS_CHECKER_CONFIGS: repos.json
-  OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
+  OS_CHECKER_CONFIGS: os-checker.json
+  # OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
 
 jobs:
   run:
