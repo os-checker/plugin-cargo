@@ -10,9 +10,12 @@ pub struct Db {
 
 impl Db {
     pub fn open() -> Result<Self> {
-        Ok(Db {
-            db: Database::create(FILE)?,
-        })
+        let db = Database::create(FILE)?;
+
+        // create table if not present
+        info!("open_table: {:?}", db.begin_write()?.open_table(TABLE));
+
+        Ok(Db { db })
     }
 
     pub fn load_cache(&self, key: &CachedKey) -> Result<Option<CachedValue>> {
