@@ -142,9 +142,14 @@ impl Repo {
 
         outputs.sort_unstable_keys();
 
+        let now = os_checker_types::now();
         let json = serde_json::json!({
             "user": self.user,
             "repo": self.repo,
+            "timestamp": {
+                "start": now,
+                "end": now
+            },
             "pkgs": outputs
         });
         self.write_json(&json)?;
