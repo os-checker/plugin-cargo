@@ -62,6 +62,28 @@ impl CachedValue {
     pub fn into_json(self) -> serde_json::Value {
         self.inner
     }
+
+    // update end timestamp
+    pub fn update_timestamp(&mut self) {
+        const TIMESTAMP: &str = "timestamp";
+        const START: &str = "start";
+        const END: &str = "end";
+
+        let now = os_checker_types::now();
+
+        if let Some(ts) = self.inner.get_mut(TIMESTAMP) {
+            if let Some(end) = ts.get_mut(END) {
+                *end = serde_json::json!(now);
+            }
+        } else if let Some(map) = self.inner.as_object_mut() {
+            map.insert(
+                TIMESTAMP.to_owned(),
+                serde_json::json!({
+                    START: now, END: now
+                }),
+            );
+        }
+    }
 }
 
 impl redb::Value for CachedValue {

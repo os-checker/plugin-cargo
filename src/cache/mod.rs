@@ -31,10 +31,11 @@ pub fn get_or_gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     let _span = error_span!("cache", key = format!("{:?}", key.api)).entered();
 
     let db = db::Db::open()?;
-    let (key, val) = match db.load_cache(&key)? {
+    let (key, mut val) = match db.load_cache(&key)? {
         Some(val) => (key, val),
         None => gen_cache(user_repo)?,
     };
+    val.update_timestamp();
     db.store_cache(&key, &val)?;
     Ok((key, val))
 }
