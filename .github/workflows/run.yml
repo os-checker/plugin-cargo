@@ -30,7 +30,7 @@ jobs:
         run: cargo miri setup
 
       - name: Download cache
-        run: gh release download -R os-checker/database ${{ env.TAG_CACHE }} -p cache.redb || echo "${{ env.TAG_CACHE }} not found"
+        run: gh release download -R os-checker/database ${{ env.TAG_CACHE }} -p ${{ env.TAG_CACHE }} || echo "${{ env.TAG_CACHE }} not found"
 
       - name: Fetch os-checker config JSONs
         run: |
