@@ -10,10 +10,8 @@ const TABLE: TableDefinition<CachedKey, CachedValue> = TableDefinition::new("plu
 pub struct CachedKey {
     user: String,
     repo: String,
-    git_info: GitInfo,
+    api: Api,
 }
-
-impl CachedKey {}
 
 impl redb::Key for CachedKey {
     fn compare(data1: &[u8], data2: &[u8]) -> std::cmp::Ordering {
@@ -111,19 +109,46 @@ pub fn gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
         CachedKey {
             user: repo.user,
             repo: repo.repo,
-            git_info: repo.git_info,
+            api: repo.git_info.into(),
         },
         CachedValue { inner: output },
     ))
 }
 
-#[derive(Debug, Deserialize)]
+pub fn get_or_gen(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
+    let key = github_graphql_api(user_repo)?;
+    let (key, val) = match read_cache(&key)? {
+        Some(val) => (key, val),
+        None => gen_cache(user_repo)?,
+    };
+    Ok((key, val))
+}
+
+const FILE: &str = "cache-plugin-cargo-v0.1.4.redb";
+
+fn read_cache(key: &CachedKey) -> Result<Option<CachedValue>> {
+    let db = Database::create(FILE)?;
+    let read_txn = db.begin_read()?;
+    let table = read_txn.open_table(TABLE)?;
+    Ok(table.get(key)?.map(|val| val.value()))
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
 struct Api {
     branch: String,
     sha: String,
 }
 
-fn github_graphql_api(user_repo: &str) -> Result<Api> {
+impl From<GitInfo> for Api {
+    fn from(info: GitInfo) -> Self {
+        Api {
+            branch: info.branch,
+            sha: info.sha,
+        }
+    }
+}
+
+fn github_graphql_api(user_repo: &str) -> Result<CachedKey> {
     // gh api graphql -f query='
     //   query($owner: String!, $name: String!) {
     //     repository(owner: $owner, name: $name) {
@@ -162,7 +187,7 @@ query($owner: String!, $name: String!) {
     ));
     let json = expr.read()?;
     let api: Api = serde_json::from_str(&json)?;
-    Ok(api)
+    Ok(CachedKey { user, repo, api })
 }
 
 #[test]

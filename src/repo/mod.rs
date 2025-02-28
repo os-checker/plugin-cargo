@@ -14,7 +14,7 @@ mod os_checker;
 mod output;
 mod testcases;
 
-pub fn split_user_repo(user_repo: &str) -> Result<[&str; 2]> {
+pub fn split_user_repo(user_repo: &str) -> Result<[String; 2]> {
     let mut split = user_repo.split("/");
     let user = split
         .next()
@@ -22,7 +22,7 @@ pub fn split_user_repo(user_repo: &str) -> Result<[&str; 2]> {
     let repo = split
         .next()
         .with_context(|| format!("Not found repo in `{user_repo}`."))?;
-    Ok([user, repo])
+    Ok([user.to_owned(), repo.to_owned()])
 }
 
 #[derive(Debug)]
@@ -44,7 +44,7 @@ impl Repo {
         // this implies repo downloading
         let pkg_targets = os_checker::run(user_repo)?;
 
-        let dir = local_repo_dir(user, repo);
+        let dir = local_repo_dir(&user, &repo);
         let mut cargo_tomls = get_cargo_tomls_recursively(&dir);
         cargo_tomls.sort_unstable();
 
@@ -53,8 +53,8 @@ impl Repo {
         let git_info = GitInfo::new(&dir)?;
 
         Ok(Repo {
-            user: user.to_owned(),
-            repo: repo.to_owned(),
+            user,
+            repo,
             dir,
             pkg_targets,
             cargo_tomls,
