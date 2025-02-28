@@ -21,14 +21,17 @@ impl Db {
             );
             write_txn.commit()?;
         }
-        info!(
-            "[begin_read] open_table: {:?} list tables = {:?}",
-            db.begin_read()?.open_table(TABLE),
-            db.begin_read()?
-                .list_tables()?
-                .map(|t| t.name().to_owned())
-                .collect::<Vec<_>>(),
-        );
+        {
+            let read_txn = db.begin_read()?;
+            info!(
+                "[begin_read] open_table: {:?} list tables = {:?}",
+                read_txn.open_table(TABLE),
+                read_txn
+                    .list_tables()?
+                    .map(|t| t.name().to_owned())
+                    .collect::<Vec<_>>(),
+            );
+        }
 
         Ok(Db { db })
     }
