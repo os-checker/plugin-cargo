@@ -13,25 +13,37 @@ impl Db {
         let db = Database::create(FILE)?;
 
         // create table if not present
-        info!("open_table: {:?}", db.begin_write()?.open_table(TABLE));
+        info!(
+            "[begin_write] open_table: {:?}",
+            db.begin_write()?.open_table(TABLE)
+        );
+        info!(
+            "[begin_read] open_table: {:?}",
+            db.begin_read()?.open_table(TABLE)
+        );
 
         Ok(Db { db })
     }
 
     pub fn load_cache(&self, key: &CachedKey) -> Result<Option<CachedValue>> {
+        info!("begin to load cache");
         let read_txn = self.db.begin_read()?;
         let table = read_txn.open_table(TABLE)?;
-        Ok(table.get(key)?.map(|val| val.value()))
+        let val = table.get(key)?.map(|val| val.value());
+        info!("cache found");
+        Ok(val)
     }
 
     // TODO: add a timestamp for each store
     pub fn store_cache(&self, key: &CachedKey, val: &CachedValue) -> Result<()> {
+        info!("begin to store cache");
         let write_txn = self.db.begin_write()?;
         {
             let mut table = write_txn.open_table(TABLE)?;
             table.insert(key, val)?;
         }
         write_txn.commit()?;
+        info!("cache written");
         Ok(())
     }
 }

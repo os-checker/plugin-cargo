@@ -28,6 +28,8 @@ fn gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
 /// Get a local cache if any, otherwise download the repo and generate the cache.
 pub fn get_or_gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     let key = gh::graphql_api(user_repo)?;
+    let _span = error_span!("cache", key = format!("{key:?}")).entered();
+
     let db = db::Db::open()?;
     let (key, val) = match db.load_cache(&key)? {
         Some(val) => (key, val),
