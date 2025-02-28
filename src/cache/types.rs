@@ -59,8 +59,8 @@ impl CachedValue {
         Self { inner }
     }
 
-    pub fn json(&self) -> &serde_json::Value {
-        &self.inner
+    pub fn into_json(self) -> serde_json::Value {
+        self.inner
     }
 }
 

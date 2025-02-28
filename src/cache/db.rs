@@ -50,7 +50,10 @@ fn test_os_checker_test_suite() -> Result<()> {
 
     let read_txn = db.begin_read()?;
     let table = read_txn.open_table(TABLE)?;
-    assert_eq!(val.json(), table.get(&key)?.unwrap().value().json());
+    assert_eq!(
+        val.into_json(),
+        table.get(&key)?.unwrap().value().into_json()
+    );
 
     Ok(())
 }

@@ -11,7 +11,10 @@ mod gh;
 fn gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     let repo = Repo::new(user_repo)?;
     let output = repo.output()?;
+
+    // remove local dir: all local operations must take place before this
     std::fs::remove_dir_all(&repo.dir)?;
+
     Ok((
         CachedKey {
             user: repo.user,

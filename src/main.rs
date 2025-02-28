@@ -1,4 +1,4 @@
-use os_checker_plugin_cargo::{repo, BASE_DIR};
+use os_checker_plugin_cargo::BASE_DIR;
 use plugin::{logger, prelude::*, repos, write_json};
 
 #[macro_use]
@@ -14,16 +14,8 @@ fn main() -> Result<()> {
 
     for user_repo in &list {
         let _span = error_span!("list", user_repo).entered();
-        match repo::Repo::new(user_repo) {
-            Ok(repo) => {
-                match repo.output() {
-                    Ok(output) => outputs.push(output),
-                    Err(err) => error!(?err),
-                }
-                if let Err(err) = repo.remove_local_dir() {
-                    error!(?err);
-                };
-            }
+        match cache::get_or_gen_cache(user_repo) {
+            Ok((_, val)) => outputs.push(val.into_json()),
             Err(err) => error!(?err),
         };
     }
