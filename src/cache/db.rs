@@ -83,3 +83,22 @@ fn test_os_checker_test_suite() -> Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn test_db_list_table() -> Result<()> {
+    use redb::ReadableTableMetadata;
+    let db = Database::create(FILE)?;
+
+    let read_txn = db.begin_read()?;
+    let table = read_txn.open_table(TABLE)?;
+    println!(
+        "[begin_read] open_table: {table:?}\nlen = {:?}\nlist tables = {:?}",
+        table.len(),
+        read_txn
+            .list_tables()?
+            .map(|t| t.name().to_owned())
+            .collect::<Vec<_>>(),
+    );
+
+    Ok(())
+}
