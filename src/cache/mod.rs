@@ -9,7 +9,7 @@ mod db;
 mod gh;
 
 /// Output json when error happens.
-fn err_json(user: &str, repo: &str, err: &dyn std::error::Error) -> serde_json::Value {
+fn err_json(user: &str, repo: &str, err: &eyre::Report) -> serde_json::Value {
     let msg = strip_ansi_escapes::strip_str(format!("{err:?}"));
     let now = os_checker_types::now();
     serde_json::json!({
@@ -28,7 +28,7 @@ fn gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     let repo = Repo::new(user_repo)?;
     let output = match repo.output() {
         Ok(output) => output,
-        Err(err) => err_json(&repo.user, &repo.repo, err.as_ref()),
+        Err(err) => err_json(&repo.user, &repo.repo, &err),
     };
 
     // remove local dir: all local operations must take place before this
@@ -48,7 +48,7 @@ fn gen_cache_consuming_error(user_repo: &str, key: CachedKey) -> (CachedKey, Cac
     match gen_cache(user_repo) {
         Ok(cache) => cache,
         Err(err) => {
-            let val = CachedValue::new(err_json(&key.user, &key.repo, err.as_ref()));
+            let val = CachedValue::new(err_json(&key.user, &key.repo, &err));
             (key, val)
         }
     }
