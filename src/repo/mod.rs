@@ -216,7 +216,7 @@ fn workspaces(cargo_tomls: &[Utf8PathBuf]) -> Result<Workspaces> {
             .map_err(|err| {
                 eyre!(
                     "无法读取 cargo metadata 的结果：\n{}",
-                    strip_ansi_escapes::strip_str(format!("{err}"))
+                    strip_ansi_escapes::strip_str(format!("{err:?}"))
                 )
             })?;
         let root = &metadata.workspace_root;

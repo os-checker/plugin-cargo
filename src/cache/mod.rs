@@ -23,12 +23,6 @@ fn err_json(user: &str, repo: &str, err: &dyn std::error::Error) -> serde_json::
     })
 }
 
-#[test]
-fn test_strip_color() {
-    let msg = "\"无法读取 cargo metadata 的结果：\\n`cargo metadata` exited with an e";
-    println!("{msg}");
-}
-
 /// Generate a new cached repo and its output regarding tests and package information.
 fn gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     let repo = Repo::new(user_repo)?;
