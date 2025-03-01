@@ -96,5 +96,14 @@ fn test_db_list_table() -> Result<()> {
             .collect::<Vec<_>>(),
     );
 
+    use redb::ReadableTable;
+
+    let repo_with_err = table.iter()?.find_map(|t| {
+        let (k, v) = t.ok()?;
+        let (k, v) = (k.value(), v.value());
+        (k.user == "shilei-massclouds" && k.repo == "arch_boot").then_some(v)
+    });
+    dbg!(repo_with_err);
+
     Ok(())
 }

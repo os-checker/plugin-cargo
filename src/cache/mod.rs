@@ -23,6 +23,15 @@ fn err_json(user: &str, repo: &str, err: &dyn std::error::Error) -> serde_json::
     })
 }
 
+#[test]
+fn test_strip_color() {
+    if let Err(err) = Repo::new("shilei-massclouds/arch_boot") {
+        println!("raw msg=\n{err:?}");
+        let msg = strip_ansi_escapes::strip_str(format!("{err:?}"));
+        println!("\n{msg}");
+    }
+}
+
 /// Generate a new cached repo and its output regarding tests and package information.
 fn gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     let repo = Repo::new(user_repo)?;
