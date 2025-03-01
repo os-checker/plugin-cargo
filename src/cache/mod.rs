@@ -53,21 +53,30 @@ fn gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     ))
 }
 
+fn gen_cache_consuming_error(user_repo: &str, key: CachedKey) -> (CachedKey, CachedValue) {
+    match gen_cache(user_repo) {
+        Ok(cache) => cache,
+        Err(err) => {
+            let val = CachedValue::new(err_json(&key.user, &key.repo, err.as_ref()));
+            (key, val)
+        }
+    }
+}
+
 /// Get a local cache if any, otherwise download the repo and generate the cache.
 pub fn get_or_gen_cache(user_repo: &str) -> Result<(CachedKey, CachedValue)> {
     let key = gh::graphql_api(user_repo)?;
     let _span = error_span!("cache", key = format!("{:?}", key.api)).entered();
 
     let db = db::Db::open()?;
-    let (key, mut val) = match db.load_cache(&key)? {
-        Some(val) => (key, val),
-        None => match gen_cache(user_repo) {
-            Ok(cache) => cache,
-            Err(err) => {
-                let val = CachedValue::new(err_json(&key.user, &key.repo, err.as_ref()));
-                (key, val)
-            }
-        },
+    let force = std::env::var("OS_CHECKER_FORCE_PLUGIN_CARGO");
+    let (key, mut val) = if let Ok("true") = force.as_deref() {
+        gen_cache_consuming_error(user_repo, key)
+    } else {
+        match db.load_cache(&key)? {
+            Some(val) => (key, val),
+            None => gen_cache_consuming_error(user_repo, key),
+        }
     };
     val.update_timestamp();
     db.store_cache(&key, &val)?;
