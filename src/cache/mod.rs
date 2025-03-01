@@ -10,7 +10,7 @@ mod gh;
 
 /// Output json when error happens.
 fn err_json(user: &str, repo: &str, err: &dyn std::error::Error) -> serde_json::Value {
-    let msg = strip_ansi_escapes::strip_str(format!("{err:?}"));
+    let msg = strip_ansi_escapes::strip_str(format!("{err}"));
     let now = os_checker_types::now();
     serde_json::json!({
         "user": user,
@@ -25,11 +25,8 @@ fn err_json(user: &str, repo: &str, err: &dyn std::error::Error) -> serde_json::
 
 #[test]
 fn test_strip_color() {
-    if let Err(err) = Repo::new("shilei-massclouds/arch_boot") {
-        println!("raw msg=\n{err:?}");
-        let msg = strip_ansi_escapes::strip_str(format!("{err:?}"));
-        println!("\n{msg}");
-    }
+    let msg = "\"无法读取 cargo metadata 的结果：\\n`cargo metadata` exited with an e";
+    println!("{msg}");
 }
 
 /// Generate a new cached repo and its output regarding tests and package information.
