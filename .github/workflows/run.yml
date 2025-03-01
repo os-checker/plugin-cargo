@@ -15,8 +15,8 @@ env:
   BOT: 1
   OS_CHECKER_FORCE_PLUGIN_CARGO: true
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  OS_CHECKER_CONFIGS: os-checker.json
-  # OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
+  # OS_CHECKER_CONFIGS: os-checker.json
+  OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
 
 jobs:
   run:
