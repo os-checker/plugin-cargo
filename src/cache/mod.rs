@@ -10,7 +10,7 @@ mod gh;
 
 /// Output json when error happens.
 fn err_json(user: &str, repo: &str, err: &dyn std::error::Error) -> serde_json::Value {
-    let msg = strip_ansi_escapes::strip_str(format!("{err}"));
+    let msg = strip_ansi_escapes::strip_str(format!("{err:?}"));
     let now = os_checker_types::now();
     serde_json::json!({
         "user": user,
