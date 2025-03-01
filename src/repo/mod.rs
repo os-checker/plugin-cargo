@@ -213,12 +213,7 @@ fn workspaces(cargo_tomls: &[Utf8PathBuf]) -> Result<Workspaces> {
         let metadata = cargo_metadata::MetadataCommand::new()
             .manifest_path(cargo_toml)
             .exec()
-            .map_err(|err| {
-                eyre!(
-                    "无法读取 cargo metadata 的结果：\n{}",
-                    strip_ansi_escapes::strip_str(format!("{err}"))
-                )
-            })?;
+            .with_context(|| format!("无法读取 {cargo_toml} 内 cargo metadata 的结果"))?;
         let root = &metadata.workspace_root;
         // 每个 member package 解析的 workspace_root 和 members 是一样的
         if !map.contains_key(root) {
