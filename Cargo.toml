@@ -11,7 +11,7 @@ repository = "https://github.com/os-checker/plugin-cargo"
 
 [dependencies]
 plugin = { version = "0.1.2", package = "os-checker-plugin" }
-os-checker-types = "0.4.1"
+os-checker-types = "0.6"
 strip-ansi-escapes = "0.2"
 serde = "1"
 
