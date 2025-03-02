@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
   RUST_LOG: info
   # database branch
-  DATABASE: debug
+  DATABASE: main
   TAG_CACHE: cache-plugin-cargo-v0.1.4.redb
   BOT: 1
   OS_CHECKER_FORCE_PLUGIN_CARGO: true
