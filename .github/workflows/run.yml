@@ -13,7 +13,7 @@ env:
   DATABASE: main
   TAG_CACHE: cache-plugin-cargo-v0.1.4.redb
   BOT: 1
-  OS_CHECKER_FORCE_PLUGIN_CARGO: true
+  OS_CHECKER_FORCE_PLUGIN_CARGO: false
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   # OS_CHECKER_CONFIGS: os-checker.json
   OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
