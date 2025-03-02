@@ -1,6 +1,6 @@
 [package]
 name = "os-checker-plugin-cargo"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 license = "MIT"
 exclude = ["*.json", "*.sh", ".github", "tests"]
