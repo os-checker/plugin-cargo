@@ -26,6 +26,8 @@ eyre = "0.6"
 # logger
 tracing = "0.1"
 
+redb = "2.4"
+
 # The profile that 'dist' will build with
 [profile.dist]
 inherits = "release"

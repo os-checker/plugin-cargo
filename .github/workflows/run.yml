@@ -11,9 +11,11 @@ env:
   RUST_LOG: info
   # database branch
   DATABASE: main
+  TAG_CACHE: cache-plugin-cargo-v0.1.4.redb
   BOT: 1
+  OS_CHECKER_FORCE_PLUGIN_CARGO: false
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  # OS_CHECKER_CONFIGS: repos.json
+  # OS_CHECKER_CONFIGS: os-checker.json
   OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
 
 jobs:
@@ -27,6 +29,9 @@ jobs:
 
       - name: Set up miri
         run: cargo miri setup
+
+      - name: Download cache
+        run: gh release download -R os-checker/database ${{ env.TAG_CACHE }} -p ${{ env.TAG_CACHE }} || echo "${{ env.TAG_CACHE }} not found"
 
       - name: Fetch os-checker config JSONs
         run: |
@@ -70,6 +75,13 @@ jobs:
         run: |
           os-checker-plugin-cargo #os-checker.json
           tree --gitignore -h cargo
+
+      - name: Upload cache
+        run: |
+          gh release upload --clobber -R os-checker/database ${{ env.TAG_CACHE }} ${{ env.TAG_CACHE }}
+          XZ_OPT=-e9 tar -cJvf ${{ env.TAG_CACHE }}.tar.xz ${{ env.TAG_CACHE }}
+          ls -alh
+          gh release upload --clobber -R os-checker/database ${{ env.TAG_CACHE }} ${{ env.TAG_CACHE }}.tar.xz
 
       - name: Push to database
         env:

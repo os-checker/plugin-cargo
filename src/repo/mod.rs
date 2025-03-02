@@ -6,10 +6,24 @@ use plugin::{prelude::*, write_json};
 use std::sync::LazyLock;
 use testcases::PkgTests;
 
+mod git_info;
+pub use git_info::GitInfo;
+
 mod miri;
 mod os_checker;
 mod output;
 mod testcases;
+
+pub fn split_user_repo(user_repo: &str) -> Result<[String; 2]> {
+    let mut split = user_repo.split("/");
+    let user = split
+        .next()
+        .with_context(|| format!("Not found user in `{user_repo}`."))?;
+    let repo = split
+        .next()
+        .with_context(|| format!("Not found repo in `{user_repo}`."))?;
+    Ok([user.to_owned(), repo.to_owned()])
+}
 
 #[derive(Debug)]
 pub struct Repo {
@@ -20,20 +34,12 @@ pub struct Repo {
     pub pkg_targets: os_checker::PkgTargets,
     pub cargo_tomls: Vec<Utf8PathBuf>,
     pub workspaces: Workspaces,
-    pub last_commit_time: Timestamp,
+    pub git_info: GitInfo,
 }
 
 impl Repo {
     pub fn new(user_repo: &str) -> Result<Repo> {
-        let mut split = user_repo.split("/");
-        let user = split
-            .next()
-            .with_context(|| format!("Not found user in `{user_repo}`."))?
-            .to_owned();
-        let repo = split
-            .next()
-            .with_context(|| format!("Not found repo in `{user_repo}`."))?
-            .to_owned();
+        let [user, repo] = split_user_repo(user_repo)?;
 
         // this implies repo downloading
         let pkg_targets = os_checker::run(user_repo)?;
@@ -44,7 +50,7 @@ impl Repo {
 
         let workspaces = workspaces(&cargo_tomls)?;
 
-        let last_commit_time = last_commit_time(&dir)?;
+        let git_info = GitInfo::new(&dir)?;
 
         Ok(Repo {
             user,
@@ -53,7 +59,7 @@ impl Repo {
             pkg_targets,
             cargo_tomls,
             workspaces,
-            last_commit_time,
+            git_info,
         })
     }
 
@@ -102,7 +108,7 @@ impl Repo {
             .unwrap_or_default();
         let pkgs = self.packages();
 
-        let last_commit_time = self.last_commit_time.to_string();
+        let last_commit_time = self.git_info.last_commit.to_string();
 
         let mut outputs = IndexMap::with_capacity(pkgs.len());
         for pkg in pkgs {
@@ -136,20 +142,18 @@ impl Repo {
 
         outputs.sort_unstable_keys();
 
+        let now = os_checker_types::now();
         let json = serde_json::json!({
             "user": self.user,
             "repo": self.repo,
+            "timestamp": {
+                "start": now,
+                "end": now
+            },
             "pkgs": outputs
         });
-        self.write_json(&json)?;
 
         Ok(json)
-    }
-
-    fn write_json(&self, json: &serde_json::Value) -> Result<()> {
-        let mut path = Utf8PathBuf::from_iter([crate::BASE_DIR, &self.user, &self.repo]);
-        path.set_extension("json");
-        write_json(&path, json)
     }
 
     pub fn remove_local_dir(self) -> Result<()> {
@@ -158,11 +162,10 @@ impl Repo {
     }
 }
 
-fn last_commit_time(root: &Utf8Path) -> Result<Timestamp> {
-    let cmd = duct::cmd!("git", "log", "-1", "--pretty=format:%ct");
-    // git log -1 --format="%ct"
-    let unix_timestamp = cmd.dir(root).read()?.trim().parse()?;
-    Ok(Timestamp::from_second(unix_timestamp)?)
+pub fn write_output_json(user: &str, repo: &str, json: &serde_json::Value) -> Result<()> {
+    let mut path = Utf8PathBuf::from_iter([crate::BASE_DIR, user, repo]);
+    path.set_extension("json");
+    write_json(&path, json)
 }
 
 pub fn local_base_dir() -> &'static Utf8Path {
@@ -210,7 +213,12 @@ fn workspaces(cargo_tomls: &[Utf8PathBuf]) -> Result<Workspaces> {
         let metadata = cargo_metadata::MetadataCommand::new()
             .manifest_path(cargo_toml)
             .exec()
-            .map_err(|err| eyre!("无法读取 cargo metadata 的结果：{err}"))?;
+            .map_err(|err| {
+                eyre!(
+                    "无法读取 cargo metadata 的结果：\n{}",
+                    strip_ansi_escapes::strip_str(format!("{err}"))
+                )
+            })?;
         let root = &metadata.workspace_root;
         // 每个 member package 解析的 workspace_root 和 members 是一样的
         if !map.contains_key(root) {
@@ -232,9 +240,4 @@ fn test_pkg_targets() -> Result<()> {
     dbg!(&repo.pkg_targets);
     repo.remove_local_dir()?;
     Ok(())
-}
-
-#[test]
-fn test_last_commit_time() {
-    dbg!(last_commit_time(".".into()).unwrap());
 }

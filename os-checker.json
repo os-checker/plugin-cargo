@@ -1,4 +1,3 @@
-[
-  "qclic/fdt-parser",
-  "os-checker/os-checker"
-]
+{
+  "shilei-massclouds/arch_boot": {}
+}
