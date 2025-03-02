@@ -1,7 +1,7 @@
 use super::{CachedKey, CachedValue, Result};
 use redb::{Database, ReadableTableMetadata, TableDefinition, TableHandle};
 
-const FILE: &str = "cache-plugin-cargo-v0.1.4.redb";
+const FILE: &str = "cache-plugin-cargo-v0.1.5.redb";
 const TABLE: TableDefinition<CachedKey, CachedValue> = TableDefinition::new("plugin-cargo");
 
 pub struct Db {
