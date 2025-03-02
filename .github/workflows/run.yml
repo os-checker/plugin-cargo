@@ -11,7 +11,7 @@ env:
   RUST_LOG: info
   # database branch
   DATABASE: main
-  TAG_CACHE: cache-plugin-cargo-v0.1.4.redb
+  TAG_CACHE: cache-plugin-cargo-v0.1.5.redb
   BOT: 1
   OS_CHECKER_FORCE_PLUGIN_CARGO: false
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -78,6 +78,7 @@ jobs:
 
       - name: Upload cache
         run: |
+          gh release create ${{ env.TAG_CACHE }} --notes ${{ env.TAG_CACHE }} --prerelease -R os-checker/database || echo "${{ env.TAG_CACHE }} already exists"
           gh release upload --clobber -R os-checker/database ${{ env.TAG_CACHE }} ${{ env.TAG_CACHE }}
           XZ_OPT=-e9 tar -cJvf ${{ env.TAG_CACHE }}.tar.xz ${{ env.TAG_CACHE }}
           ls -alh
