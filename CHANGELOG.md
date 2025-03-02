@@ -1,6 +1,6 @@
-# v0.1.4
+# v0.1.5
 
-Support cache-plugin-cargo-v0.1.4.redb. (See #29)
+Support cache-plugin-cargo-v0.1.5.redb. (See #29)
 
 # v0.1.3
 
