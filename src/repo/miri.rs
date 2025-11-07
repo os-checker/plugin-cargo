@@ -1,6 +1,6 @@
-use os_checker_types::Utf8Path;
-
 use child_wait_timeout::ChildWT;
+use eyre::Result;
+use os_checker_types::Utf8Path;
 use std::io::Read;
 use std::process::{Command, Stdio};
 use std::time::Duration;
@@ -79,4 +79,40 @@ fn miri_output() {
     .0
     .unwrap();
     eprintln!("{stderr}");
+}
+
+fn detect_miri(dir: &Utf8Path) -> Result<()> {
+    let output = Command::new("cargo")
+        .args(["miri", "--version"])
+        .current_dir(dir)
+        .output()
+        .unwrap();
+    if !output.status.success() {
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        bail!("stderr={stderr}\nstdout={stdout}")
+    }
+    Ok(())
+}
+
+/// Install miri only when it's absent.
+pub fn install_miri(dir: &Utf8Path) -> Result<()> {
+    let Err(err) = detect_miri(dir) else {
+        return Ok(());
+    };
+
+    info!(%dir, ?err, "Miri needs to be installed!");
+
+    // rustup component add miri
+    let output = Command::new("rustup")
+        .args(["component", "add", "miri"])
+        .current_dir(dir)
+        .output()
+        .unwrap();
+    if !output.status.success() {
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        bail!("stderr={stderr}\nstdout={stdout}")
+    }
+    Ok(())
 }

@@ -150,10 +150,11 @@ pub fn run_testcases(ws_dir: &Utf8Path) -> Result<Report> {
     let reports = parse_test_reports(std::str::from_utf8(&output.stdout)?);
     // new event overrides old ones:
     // e.g. if a test result is ok, we won't get its started report
-    let testcases = reports
+    let testcases: IndexMap<_, _> = reports
         .into_iter()
         .map(|report| (report.name, (report.event, report.exec_time, report.stdout)))
         .collect();
+    debug!(testcases.len = testcases.len());
 
     Ok(Report { stderr, testcases })
 }

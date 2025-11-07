@@ -4,11 +4,10 @@ on:
   schedule:
     - cron: '0 0 * * *'
   push:
-    branches: [ main, feat/*, fix/* ]
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_LOG: info
+  RUST_LOG: debug
   # database branch
   DATABASE: main
   TAG_CACHE: cache-plugin-cargo-v0.1.5.redb
