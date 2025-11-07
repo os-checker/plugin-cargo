@@ -1,8 +1,13 @@
 use super::{CachedKey, CachedValue, Result};
 use redb::{Database, ReadableTableMetadata, TableDefinition, TableHandle};
 
-const FILE: &str = "cache-plugin-cargo-v0.1.5.redb";
 const TABLE: TableDefinition<CachedKey, CachedValue> = TableDefinition::new("plugin-cargo");
+
+fn db_file() -> String {
+    const TAG_CACHE: &str = "TAG_CACHE";
+    std::env::var(TAG_CACHE)
+        .unwrap_or_else(|_| panic!("{TAG_CACHE:?} should be set to specify the db file path."))
+}
 
 pub struct Db {
     db: Database,
@@ -10,7 +15,7 @@ pub struct Db {
 
 impl Db {
     pub fn open() -> Result<Self> {
-        let db = Database::create(FILE)?;
+        let db = Database::create(db_file())?;
 
         // create table if not present
         {
@@ -83,7 +88,7 @@ fn test_os_checker_test_suite() -> Result<()> {
 
 #[test]
 fn test_db_list_table() -> Result<()> {
-    let db = Database::create(FILE)?;
+    let db = Database::create(db_file())?;
 
     let read_txn = db.begin_read()?;
     let table = read_txn.open_table(TABLE)?;
