@@ -71,8 +71,11 @@ jobs:
         run: cargo install --path .
 
       - name: Run plugin-cargo
+        run: os-checker-plugin-cargo #os-checker.json
+
+      - name: View outputs
         run: |
-          os-checker-plugin-cargo #os-checker.json
+          ls -alh
           tree --gitignore -h cargo
 
       - name: Upload cache
