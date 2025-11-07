@@ -1,3 +1,4 @@
+use super::miri::{cargo_miri, install_miri};
 use crate::nextest::{run_testcases, Event, Report};
 use nextest_metadata::{RustTestSuiteSummary, TestListSummary};
 use plugin::prelude::*;
@@ -17,6 +18,10 @@ pub type PkgTests = IndexMap<String, TestCases>;
 // nextest reports all member tests even if it's run under a member, so we just run under workspace
 pub fn get(workspace_root: &Utf8Path) -> Result<PkgTests> {
     let _span = error_span!("get_and_run", ?workspace_root).entered();
+
+    if let Err(err) = install_miri(workspace_root) {
+        error!(?err, "Failed to install miri!");
+    }
 
     info!("test_list starts");
     let summary = test_list(workspace_root).with_context(|| "failed to get test list")?;
@@ -113,7 +118,7 @@ impl TestCase {
         workspace_root: &Utf8Path,
     ) -> Self {
         let (miri_output, miri_pass, miri_timeout) =
-            super::miri::cargo_miri(pkg_name, kind, bin_name, name, workspace_root);
+            cargo_miri(pkg_name, kind, bin_name, name, workspace_root);
         let (status, duration_ms, error) = report.get_test_case(&[pkg_name, bin_name, name]);
         let name = name.to_owned();
         Self {
