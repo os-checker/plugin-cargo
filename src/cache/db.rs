@@ -38,7 +38,7 @@ impl Db {
         let read_txn = self.db.begin_read()?;
         let table = read_txn.open_table(TABLE)?;
         let val = table.get(key)?.map(|val| val.value());
-        info!("cache found");
+        val.as_ref().inspect(|_| info!("cache found"));
         Ok(val)
     }
 
