@@ -1,3 +1,8 @@
+# v0.1.7
+
+* Fix: Install miri if absent (See #35)
+* Feat: Db file is specified by environment variable `TAG_CACHE`
+
 # v0.1.6
 
 Change license from MIT to `GPL-3.0 OR MulanPubL`.
