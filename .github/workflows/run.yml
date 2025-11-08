@@ -12,10 +12,11 @@ env:
   DATABASE: main
   TAG_CACHE: cache-plugin-cargo-v0.1.7.redb
   BOT: 1
-  OS_CHECKER_FORCE_PLUGIN_CARGO: false
+  OS_CHECKER_FORCE_PLUGIN_CARGO: true
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  # OS_CHECKER_CONFIGS: os-checker.json
-  OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
+  OS_CHECKER_CONFIGS: os-checker.json
+  # OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
+  MIRIFLAGS: -Zmiri-disable-isolation
 
 jobs:
   run:
