@@ -16,6 +16,7 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   # OS_CHECKER_CONFIGS: os-checker.json
   OS_CHECKER_CONFIGS: repos-default.json repos-ui.json
+  MIRIFLAGS: -Zmiri-disable-isolation
 
 jobs:
   run:

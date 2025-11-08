@@ -1,3 +1,4 @@
 {
-  "shilei-massclouds/arch_boot": {}
+  "arceos-org/axconfig-gen": {},
+  "drivercraft/fdt-parser": {}
 }
